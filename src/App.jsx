@@ -27,15 +27,21 @@ const AddTodo = ({ addTodo }) => {
   )
 }
 
-const Todo = ({ todo, toggleComplete, updateTodo }) => {
+const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
 
   const [newTodo, setNewTodo] = useState(todo.text)
 
   const handleUpdate = () => {
+    console.log("Updating: ", newTodo)
     updateTodo({
       text: newTodo,
       status: todo.status,
     })
+  } 
+
+  const handleDelete = () => {
+    console.log("Deleting: ", todo)
+    deleteTodo(todo)
   }
 
   return (
@@ -52,6 +58,7 @@ const Todo = ({ todo, toggleComplete, updateTodo }) => {
       />
       <input type="text" value={newTodo} onChange={(e) => setNewTodo(e.target.value)} />
       <button onClick={handleUpdate}>Update</button>
+      <button onClick={handleDelete}>Delete</button>
       {todo.status}
     </div>
   )
@@ -80,6 +87,11 @@ function App() {
     )
   }
 
+  const deleteTodo = (todoToDelete) => {
+    setTodos(todos.filter(todo => todo !== todoToDelete))
+    console.log("Deleted: ", todoToDelete)
+  }
+
   return (
     <>
       <h1>ToDo App</h1>
@@ -92,6 +104,7 @@ function App() {
           todo={todo}
           toggleComplete={toggleComplete}
           updateTodo={updateTodo}
+          deleteTodo={deleteTodo}
         />
       ))}
     </>
