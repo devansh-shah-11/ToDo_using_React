@@ -10,6 +10,7 @@ const AddTodo = ({ addTodo }) => {
     addTodo({
       text: task,
       status: false,
+      isUpdating: false,
     })
   
     setTodo('')
@@ -30,14 +31,17 @@ const AddTodo = ({ addTodo }) => {
 const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
 
   const [newTodo, setNewTodo] = useState(todo.text)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const handleUpdate = () => {
-    console.log("Updating: ", newTodo)
     updateTodo({
+      ...todo,
       text: newTodo,
+      isUpdating: false,
       status: todo.status,
-    })
-  } 
+    });
+    setIsUpdating(false);
+  };  
 
   const handleDelete = () => {
     console.log("Deleting: ", todo)
@@ -46,20 +50,29 @@ const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
 
   return (
     <div>
-      <span>{todo.text}</span>
-      <input
-        type='checkbox'
-        checked={todo.status}
-        onChange={() => {
-            toggleComplete(todo)
-            console.log(`Todo ${todo.text} is now ${!todo.status}`)
-          }
-        }
-      />
-      <input type="text" value={newTodo} onChange={(e) => setNewTodo(e.target.value)} />
-      <button onClick={handleUpdate}>Update</button>
-      <button onClick={handleDelete}>Delete</button>
-      {todo.status}
+      {!isUpdating ? (
+        <>
+          <span>{todo.text}</span>
+          <input
+            type='checkbox'
+            checked={todo.status}
+            onChange={() => {
+              toggleComplete(todo);
+            }}
+          />
+          <button onClick={() => setIsUpdating(true)}>Edit</button>
+          <button onClick={handleDelete}>Delete</button>
+        </>
+      ) : (
+        <>
+          <input
+            type='text'
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+          />
+          <button onClick={handleUpdate}>Save Changes</button>
+        </>
+      )}
     </div>
   )
 }
