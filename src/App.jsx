@@ -1,23 +1,25 @@
 import { useState, useRef } from 'react';
 
 function ToDoApp() {
+
   const AddTodo = ({ addTodo }) => {
 
     const [task, setTodo] = useState(''); 
-    const updateRef = useRef(null);
   
     const handleSubmit = (e) => {
-      console.log("Task: ", task)
-      e.preventDefault()
-      addTodo({
-        text: task,
-        status: false,
-        isUpdating: false,
-      })
-    
-      setTodo('');
-    
+      console.log("Task: ", task);
+      if (task === ''){
+        alert("Task cannot be empty");
+      }
+      else{
+        addTodo({
+          text: task,
+          status: false,
+          isUpdating: false,
+        });
+      }
     }
+
     return (
       <form onSubmit={handleSubmit}>
         <input
@@ -30,24 +32,25 @@ function ToDoApp() {
     )
   }
   
-  const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo, updateRef }) => {
+  const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
   
-    const [newTodo, setNewTodo] = useState(todo.text)
-    const [isUpdating, setIsUpdating] = useState(false)
-  
+    const [newTodo, setNewTodo] = useState(todo.text);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const updateRef = useRef(null);
+
     const handleUpdate = () => {
+      const originalTodo = updateRef.current;
+      console.log("Original: ", originalTodo);
       updateTodo({
-        ...todo,
+        originalTodo,
         text: newTodo,
-        isUpdating: false,
         status: todo.status,
       });
-      setIsUpdating(false);
     };  
   
     const handleDelete = () => {
-      console.log("Deleting: ", todo)
-      deleteTodo(todo)
+      console.log("Deleting: ", todo);
+      deleteTodo(todo);
     }
   
     return (
@@ -62,7 +65,12 @@ function ToDoApp() {
                 toggleComplete(todo);
               }}
             />
-            <button onClick={() => setIsUpdating(true)}>Edit</button>
+            <button onClick={() => {
+              setIsUpdating(true);
+              updateRef.current = todo.text;
+              }}
+            >Edit</button>
+
             <button onClick={handleDelete}>Delete</button>
           </>
         ) : (
@@ -70,7 +78,7 @@ function ToDoApp() {
             <input
               type='text'
               value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
+              onChange={(e) => setNewTodo (e.target.value)}
             />
             <button onClick={handleUpdate}>Save Changes</button>
           </>
@@ -82,28 +90,30 @@ function ToDoApp() {
   const [todos, setTodos] = useState([])
   
   const addTodo = (newTodo) => {
-    setTodos([...todos, newTodo])
+    setTodos([...todos, newTodo]);
   }
   
   const toggleComplete = (todo) => {
+    console.log("Toggling: ", todo);
     setTodos(
       todos.map((t) =>
         t === todo ? { ...t, status: !t.status} : t
       )
-    )
+    );
   }
   
-  const updateTodo = (todo) => {
+  const updateTodo = (updatedTodo) => {
+    console.log("Updating: ", updatedTodo);
     setTodos(
       todos.map((t) =>
-        t === todo ? t :{ ...t, text: todo.text}
+        t.text === updatedTodo.originalTodo ? { ...t, text: updatedTodo.text} : t
       )
-    )
+    );
   }
   
   const deleteTodo = (todoToDelete) => {
-    setTodos(todos.filter(todo => todo !== todoToDelete))
-    console.log("Deleted: ", todoToDelete)
+    setTodos(todos.filter(todo => todo !== todoToDelete));
+    console.log("Deleted: ", todoToDelete);
   }
   
   return (
