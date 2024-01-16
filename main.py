@@ -74,6 +74,23 @@ async def update_task(user_id: str, task: str, status: bool):
     db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} updated successfully"}
 
+@app.put('/tasks')
+async def update_task(user_id: str, task: str, status: bool, newtask: str):
+    user = db.users.find_one({'_id': ObjectId(user_id)})
+    if not user:
+        return {"message": f"user does not exist"}
+    tasks = user.get('tasks', {})
+    if task not in tasks:
+        return {"message": f"task {task} does not exist"}
+    updated_tasks = {}
+    for key in tasks.keys():
+        if key == task:
+            updated_tasks[newtask] = status
+        else:
+            updated_tasks[key] = tasks[key]
+    db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'tasks': updated_tasks}})
+    return {"message": f"task {task} updated successfully"}
+
 @app.delete('/tasks/{task}')
 async def delete_task(user_id: str, task: str):
     user = db.users.find_one({'_id': ObjectId(user_id)})

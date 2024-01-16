@@ -76,6 +76,19 @@ function ToDoApp() {
     const handleUpdate = () => {
       const originalTodo = updateRef.current;
       console.log("Original: ", originalTodo);
+      const url = `http://localhost:8000/tasks/`;
+      axios.put(
+        url,
+        {},
+        {
+          params: {
+            user_id: '659ce5e520c703338f797c08',
+            task: originalTodo,
+            status: todo.status,
+            newtask: newTodo,
+          }
+        }
+      )
       updateTodo({
         originalTodo,
         text: newTodo,
