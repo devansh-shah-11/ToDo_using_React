@@ -18,10 +18,9 @@ function ToDoApp() {
           user_id: '659ce5e520c703338f797c08',
           task: task,
           status: false,
-          // isUpdating: false,
+          isUpdating: false,
         };
         try {
-          // const response = axios.post('http://localhost:8000/tasks', newTodo);
           // const url = 'http://localhost:8000/tasks?user_id=' + newTodo.user_id + '&task=' + newTodo.task + '&status=' + newTodo.status;
           // const response = axios.post(url);
           const url = 'http://localhost:8000/tasks';
@@ -40,19 +39,16 @@ function ToDoApp() {
           addTodo({
             text: newTodo.task,
             status: newTodo.status,
-            isUpdating: false,
+            isUpdating: newTodo.isUpdating,
           });
           console.log("Added New Todo: ", newTodo);
         }
         catch (error) {
           if (error.response) {
-            // The request was made and the server responded with a status code
             console.error("Error Response Data: ", error.response.data);
           } else if (error.request) {
-            // The request was made but no response was received
             console.error("No response received");
           } else {
-            // Something happened in setting up the request that triggered an Error
             console.error("Error Setting Up Request: ", error.message);
           }
         }
@@ -87,9 +83,25 @@ function ToDoApp() {
       });
     };  
   
-    const handleDelete = () => {
-      console.log("Deleting: ", todo);
-      deleteTodo(todo);
+    const handleDelete = async () => {
+      const toDelete = todo.text;
+      console.log("Deleting: ", toDelete);
+      const url = `http://localhost:8000/tasks/${toDelete}`;
+      try{
+        const response = await axios.delete(
+          url,
+          {
+            params: {
+              user_id: '659ce5e520c703338f797c08',
+            }
+          }
+        )
+        console.log("Response: ", response);
+        deleteTodo(todo);
+      }
+      catch (error) {
+        console.error("Error deleting todo: ", error);
+      }
     }
   
     return (
