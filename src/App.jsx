@@ -1,22 +1,61 @@
 import { useState, useRef } from 'react';
+import axios from 'axios';
 
 function ToDoApp() {
 
   const AddTodo = ({ addTodo }) => {
-
+    
     const [task, setTodo] = useState(''); 
   
     const handleSubmit = (e) => {
+      e.preventDefault();
       console.log("Task: ", task);
       if (task === ''){
         alert("Task cannot be empty");
       }
       else{
-        addTodo({
-          text: task,
+        const newTodo = {
+          user_id: '659ce5e520c703338f797c08',
+          task: task,
           status: false,
-          isUpdating: false,
-        });
+          // isUpdating: false,
+        };
+        try {
+          // const response = axios.post('http://localhost:8000/tasks', newTodo);
+          // const url = 'http://localhost:8000/tasks?user_id=' + newTodo.user_id + '&task=' + newTodo.task + '&status=' + newTodo.status;
+          // const response = axios.post(url);
+          const url = 'http://localhost:8000/tasks';
+          const response = axios.post(
+            url,
+            {},
+            {
+              params: {
+                user_id: newTodo.user_id,
+                task: newTodo.task,
+                status: newTodo.status,
+              }
+            }
+          )
+          console.log("Response: ", response);
+          addTodo({
+            text: newTodo.task,
+            status: newTodo.status,
+            isUpdating: false,
+          });
+          console.log("Added New Todo: ", newTodo);
+        }
+        catch (error) {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            console.error("Error Response Data: ", error.response.data);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.error("No response received");
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.error("Error Setting Up Request: ", error.message);
+          }
+        }
       }
     }
 
