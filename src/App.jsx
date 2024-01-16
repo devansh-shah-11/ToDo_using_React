@@ -146,6 +146,18 @@ function ToDoApp() {
   
   const toggleComplete = (todo) => {
     console.log("Toggling: ", todo);
+    const url = `http://localhost:8000/tasks/${todo.text}`;
+    axios.put(
+      url,
+      {},
+      {
+        params: {
+          user_id: '659ce5e520c703338f797c08',
+          task: todo.text,
+          status: !todo.status,
+        }
+      }
+    )
     setTodos(
       todos.map((t) =>
         t === todo ? { ...t, status: !t.status} : t
