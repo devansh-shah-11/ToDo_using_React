@@ -1,12 +1,39 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 function ToDoApp() {
 
+  const [task, setTodo] = useState([]); 
+  const user_id = '659ce5e520c703338f797c08';
+
+useEffect(() => {
+  const fetchTasks = async () => {
+    try {
+      const url = `http://localhost:8000/tasks?user_id=${user_id}`;
+      const response = await axios.get(url);
+      console.log("Fetched Tasks: ", response.data.tasks);
+      let newTodos = [];
+      for (let [task, status] of Object.entries(response.data.tasks)) {
+        console.log("Task: ", task);
+        const newTodo = {
+          task: task,
+          status: status,
+          isUpdating: false,
+        };
+        newTodos.push(newTodo);
+      }
+      console.log("New Todos: ", newTodos);
+      setTodos(newTodos);
+    } catch (error) {
+      console.error("Error fetching tasks: ", error);
+    }
+  };
+  fetchTasks();
+}, [user_id]);
+
+
   const AddTodo = ({ addTodo }) => {
     
-    const [task, setTodo] = useState(''); 
-  
     const handleSubmit = (e) => {
       e.preventDefault();
       console.log("Task: ", task);
@@ -15,7 +42,7 @@ function ToDoApp() {
       }
       else{
         const newTodo = {
-          user_id: '659ce5e520c703338f797c08',
+          user_id: user_id,
           task: task,
           status: false,
           isUpdating: false,
@@ -37,7 +64,7 @@ function ToDoApp() {
           )
           console.log("Response: ", response);
           addTodo({
-            text: newTodo.task,
+            task: newTodo.task,
             status: newTodo.status,
             isUpdating: newTodo.isUpdating,
           });
@@ -69,7 +96,7 @@ function ToDoApp() {
   
   const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
   
-    const [newTodo, setNewTodo] = useState(todo.text);
+    const [newTodo, setNewTodo] = useState(todo.task);
     const [isUpdating, setIsUpdating] = useState(false);
     const updateRef = useRef(null);
 
@@ -82,7 +109,7 @@ function ToDoApp() {
         {},
         {
           params: {
-            user_id: '659ce5e520c703338f797c08',
+            user_id: user_id,
             task: originalTodo,
             status: todo.status,
             newtask: newTodo,
@@ -91,13 +118,13 @@ function ToDoApp() {
       )
       updateTodo({
         originalTodo,
-        text: newTodo,
+        task: newTodo,
         status: todo.status,
       });
     };  
   
     const handleDelete = async () => {
-      const toDelete = todo.text;
+      const toDelete = todo.task;
       console.log("Deleting: ", toDelete);
       const url = `http://localhost:8000/tasks/${toDelete}`;
       try{
@@ -105,7 +132,7 @@ function ToDoApp() {
           url,
           {
             params: {
-              user_id: '659ce5e520c703338f797c08',
+              user_id: user_id,
             }
           }
         )
@@ -121,7 +148,7 @@ function ToDoApp() {
       <div>
         {!isUpdating ? (
           <>
-            <span>{todo.text}</span>
+            <span>{todo.task}</span>
             <input
               type='checkbox'
               checked={todo.status}
@@ -131,7 +158,7 @@ function ToDoApp() {
             />
             <button onClick={() => {
               setIsUpdating(true);
-              updateRef.current = todo.text;
+              updateRef.current = todo.task;
               }}
             >Edit</button>
 
@@ -159,14 +186,14 @@ function ToDoApp() {
   
   const toggleComplete = (todo) => {
     console.log("Toggling: ", todo);
-    const url = `http://localhost:8000/tasks/${todo.text}`;
+    const url = `http://localhost:8000/tasks/${todo.task}`;
     axios.put(
       url,
       {},
       {
         params: {
-          user_id: '659ce5e520c703338f797c08',
-          task: todo.text,
+          user_id: user_id,
+          task: todo.task,
           status: !todo.status,
         }
       }
@@ -182,7 +209,7 @@ function ToDoApp() {
     console.log("Updating: ", updatedTodo);
     setTodos(
       todos.map((t) =>
-        t.text === updatedTodo.originalTodo ? { ...t, text: updatedTodo.text} : t
+        t.task === updatedTodo.originalTodo ? { ...t, task: updatedTodo.task} : t
       )
     );
   }
@@ -199,7 +226,7 @@ function ToDoApp() {
       {todos.map((todo, index) => (
         <Todo
           key={index}
-          todo={todo}
+          todo={todo} 
           toggleComplete={toggleComplete}
           updateTodo={updateTodo}
           deleteTodo={deleteTodo}
