@@ -1,5 +1,5 @@
 from typing import Union
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from fastapi import FastAPI, HTTPException
 import numpy as np
 from pymongo import MongoClient
@@ -25,12 +25,28 @@ app.add_middleware(
 
 class User(BaseModel):
     name: str
+    email: EmailStr
+    password: str
     tasks: dict
 
-@app.post('/users')
-async def create_user(name: str):
-    db.users.insert_one({'name': name, 'tasks': {}})
-    return {"message": f"user {name} created successfully"}
+@app.post('/users/signup')
+async def create_user(name: str, email: EmailStr, password: str):
+    user = User(name=name, email=email, password=password, tasks={})
+    for u in db.users.find():
+        if u['email'] == email:
+            return {"message": "User already exists"}
+    db.users.insert_one(user.dict(by_alias=True))
+    return {"message": "User created successfully"}
+
+@app.post('/users/login')
+async def login(email: EmailStr, password: str):
+    for u in db.users.find():
+        if u['email'] == email:
+            if u['password'] == password:
+                return {"message": "Login successful"}
+            else:
+                return {"message": "Incorrect password"}
+    return {"message": "User does not exist"}
 
 class Task(BaseModel):
     user_id: str
