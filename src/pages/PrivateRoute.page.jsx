@@ -1,6 +1,7 @@
 import { useContext } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { UserContext } from "../contexts/user.context.jsx";
+import ToDoApp from "../Todo.jsx";
  
 const PrivateRoute = () => {
  
@@ -12,7 +13,7 @@ const PrivateRoute = () => {
     // If the user is not logged in we are redirecting them
     // to the login page. Otherwise we are letting them to
     // continue to the page as per the URL using <Outlet />.
-    return !user ? <Navigate to={redirectLoginUrl} /> : <Outlet /> ;
+    return !user ? <Navigate to={redirectLoginUrl} /> : <ToDoApp/> ;
 }
 
 export default PrivateRoute;

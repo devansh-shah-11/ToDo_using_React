@@ -1,13 +1,7 @@
 import { createContext, useState } from "react";
 import { App, Credentials } from "realm-web";
-import { APP_ID } from "../realm/constants";
 import axios from "axios";
 
-// Creating a Realm App Instance
-const app = new App(APP_ID);
-
-// Creating a user context to manage and access all the user related functions
-// across different components and pages.
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
@@ -15,30 +9,48 @@ export const UserProvider = ({ children }) => {
 
     // Function to log in user into our App Service app using their email & password
     const emailPasswordLogin = async (email, password) => {
-        const credentials = Credentials.emailPassword(email, password);
-        const authenticatedUser = await app.logIn(credentials);
-        setUser(authenticatedUser);
-        return authenticatedUser;
+        try{
+            const url = 'http://localhost:8000/users/login';
+            const response = await axios.post(
+                url,
+                {
+                    email: email,
+                    password: password,
+                }
+            );
+            const session_token = response.data.session_token;
+            
+            // console.log("Successfully logged in! ", response.data.session_token);
+            if (session_token !== null){
+                setUser(session_token)
+                console.log("Successfully logged in! ", session_token);
+                return session_token;
+            }
+            else{
+                return {"error": "Invalid username/password. Try again!"}
+            }
+
+        } catch (error) {
+            console.log("Error logging in user: ", error);
+            throw error;
+        }
     };
 
     // Function to sign up user into our App Service app using their email & password
     const emailPasswordSignup = async (name, email, password) => {
         console.log("Registering user...", name);
-        // await app.emailPasswordAuth.registerUser(email, password);
         try {
-            const response = await fetch('https://ap-south-1.aws.realm.mongodb.com/api/client/v2.0/app/application-0-engfn/auth/providers/local-userpass/register', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                email: email,
-                password: password,
-                }),
-            });
+            const url = 'http://localhost:8000/users/signup';
+            const response = axios.post(
+                url,
+                {
+                    name: name,
+                    email: email,
+                    password: password,
+                }
+            );
+            console.log("Response: ", response)
             console.log("Successfully registered!");
-            // Since we are automatically confirming our users, we are going to log in
-            // the user using the same credentials once the signup is complete.
             return emailPasswordLogin(email, password);
         } catch (error) {
             console.log("Error registering user: ", error);
@@ -47,29 +59,39 @@ export const UserProvider = ({ children }) => {
     };
 
     // Function to fetch the user (if the user is already logged in) from local storage
-    const fetchUser = async () => {
-        if (!app.currentUser) return false;
-        try {
-        await app.currentUser.refreshCustomData();
-        // Now, if we have a user, we are setting it to our user context
-        // so that we can use it in our app across different components.
-        setUser(app.currentUser);
-        return app.currentUser;
+    const fetchUser = async (session_token) => {
+        try{
+            const userid = await emailPasswordLogin(email, password);
+            if (length(userid) == 16){
+                setUser(userid)
+                return userid;
+            }
+            else
+                return {"error": "Invalid username/password. Try again!"}
         } catch (error) {
-        throw error;
+            console.log("Error logging in user: ", error);
+            throw error;
         }
     };
 
     // Function to logout user from our App Services app
-    const logOutUser = async () => {
-        if (!app.currentUser) return false;
+    const logOutUser = async (session_token) => {
         try {
-        await app.currentUser.logOut();
-        // Setting the user to null once loggedOut.
-        setUser(null);
-        return true;
+            const url = 'http://localhost:8000/users/logout';
+            const response = axios.post(
+                url,
+                {},
+                {
+                    params: {
+                        session_token: session_token,
+                    }
+                }
+            );
+            console.log("Successfully logged out!");
+            return response;
         } catch (error) {
-        throw error;
+            console.log("Error finding user : ", error);
+            throw error;
         }
     };
 
@@ -87,4 +109,4 @@ export const UserProvider = ({ children }) => {
         {children}
         </UserContext.Provider>
     );
-    };
+};

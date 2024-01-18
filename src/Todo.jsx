@@ -1,16 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Home from './pages/Home.page.jsx';
+import { UserContext } from "./contexts/user.context.jsx";
 
 function ToDoApp() {
 
     const [task, setTodo] = useState([]); 
-    const user_id = '659ce5e520c703338f797c08';
+
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
     const fetchTasks = async () => {
         try {
-        const url = `http://localhost:8000/tasks?user_id=${user_id}`;
+        const url = `http://localhost:8000/tasks?user_id=${user}`;
         const response = await axios.get(url);
         console.log("Fetched Tasks: ", response.data.tasks);
         let newTodos = [];
@@ -30,7 +32,7 @@ function ToDoApp() {
         }
     };
     fetchTasks();
-    }, [user_id]);
+    }, [user]);
 
 
     const AddTodo = ({ addTodo }) => {
@@ -43,7 +45,7 @@ function ToDoApp() {
         }
         else{
             const newTodo = {
-            user_id: user_id,
+            user_id: user,
             task: task,
             status: false,
             isUpdating: false,
@@ -55,7 +57,7 @@ function ToDoApp() {
                 {},
                 {
                 params: {
-                    user_id: newTodo.user_id,
+                    user_id: newTodo.user,
                     task: newTodo.task,
                     status: newTodo.status,
                 }
@@ -108,7 +110,7 @@ function ToDoApp() {
             {},
             {
             params: {
-                user_id: user_id,
+                user_id: user,
                 task: originalTodo,
                 status: todo.status,
                 newtask: newTodo,
@@ -131,7 +133,7 @@ function ToDoApp() {
             url,
             {
                 params: {
-                user_id: user_id,
+                user_id: user,
                 }
             }
             )

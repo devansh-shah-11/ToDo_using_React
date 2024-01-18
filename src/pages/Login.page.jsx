@@ -2,7 +2,7 @@ import { Button, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context.jsx";
- 
+
 const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -22,11 +22,12 @@ const Login = () => {
     const redirectNow = () => {
     const redirectTo = location.search.replace("?redirectTo=", "");
     navigate(redirectTo ? redirectTo : "/");
+    navigate(redirectTo ? redirectTo : "/");
     }
     
     const loadUser = async () => {
     if (!user) {
-        const fetchedUser = await fetchUser();
+        const fetchedUser = await emailPasswordLogin(form.email, form.password);
         if (fetchedUser) {
         redirectNow();
         }
