@@ -3,7 +3,8 @@ from pydantic import BaseModel, EmailStr
 from fastapi import FastAPI, HTTPException
 import numpy as np
 from pymongo import MongoClient
-from bson import ObjectId
+from bson import json_util
+import json
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
 
@@ -102,28 +103,33 @@ class Task(BaseModel):
     status: bool
 
 @app.post('/tasks')
-async def create_task(user_id: str, task: str, status: bool):
-    user = db.users.find_one({'session_token': user_id})
+async def create_task(task: Task):
+    user = db.users.find_one({'session_token': task.user_id})
     if not user:
         return {"message": f"user does not exist"}
     tasks = user.get('tasks', {})
     print(tasks)
-    if task in tasks:
+    if task.task in tasks:
         return {"message": f"task {task} already exists"}
-    tasks[task] = status
+    tasks[task.task] = task.status
     print(tasks)
-    db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
-    return {"message": f"task {task} created successfully"}
+    db.users.update_one({'session_token': task.user_id}, {'$set': {'tasks': tasks}})
+    return {"message": f"task {task.task} created successfully"}
 
 def fetch_tasks(user_id: str):
     user = db.users.find_one({'session_token': user_id})
     if user:
-        return user
+        user_dict = json.loads(json_util.dumps(user))
+        return user_dict['tasks']
     raise HTTPException(status_code=404, detail="User not found")
 
 @app.get('/tasks')
 async def get_tasks(user_id: str):
     return fetch_tasks(user_id)
+
+# @app.get('/tasks')
+# async def get_tasks(user_id: str):
+#     return fetch_tasks(user_id)
 
 @app.put('/tasks/{task}')
 async def update_task(user_id: str, task: str, status: bool):

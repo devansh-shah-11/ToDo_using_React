@@ -12,21 +12,39 @@ function ToDoApp() {
     useEffect(() => {
     const fetchTasks = async () => {
         try {
-        const url = `http://localhost:8000/tasks?user_id=${user}`;
-        const response = await axios.get(url);
-        console.log("Fetched Tasks: ", response.data.tasks);
-        let newTodos = [];
-        for (let [task, status] of Object.entries(response.data.tasks)) {
-            console.log("Task: ", task);
-            const newTodo = {
-            task: task,
-            status: status,
-            isUpdating: false,
-            };
-            newTodos.push(newTodo);
-        }
-        console.log("New Todos: ", newTodos);
-        setTodos(newTodos);
+            console.log("Fetching tasks for user: ", user);
+            const url = `http://localhost:8000/tasks?user_id=${user}`;
+            const response = await axios.get(url);
+            // const url = `http://localhost:8000/tasks`;
+            // const response = await axios.get(url, {
+            //     user_id: user 
+            // });
+            console.log("Response: ", response);
+            let newTodos = [];
+            for (let [task, status] of Object.entries(response.data)) {
+                console.log("Task: ", task);
+                const newTodo = {
+                    task: task,
+                    status: status,
+                    isUpdating: false,
+                };
+                newTodos.push(newTodo);
+            }
+            console.log("Existing Todos: ", newTodos);
+            setTodos(newTodos);
+            // console.log("Fetched Tasks: ", response.data.tasks);
+            // let newTodos = [];
+            // for (let [task, status] of Object.entries(response.data.tasks)) {
+            //     console.log("Task: ", task);
+            //     const newTodo = {
+            //     task: task,
+            //     status: status,
+            //     isUpdating: false,
+            //     };
+            //     newTodos.push(newTodo);
+            // }
+            // console.log("New Todos: ", newTodos);
+            // setTodos(newTodos);
         } catch (error) {
         console.error("Error fetching tasks: ", error);
         }
@@ -37,7 +55,7 @@ function ToDoApp() {
 
     const AddTodo = ({ addTodo }) => {
         
-        const handleSubmit = (e) => {
+        const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Task: ", task);
         if (task === ''){
@@ -51,25 +69,20 @@ function ToDoApp() {
             isUpdating: false,
             };
             try {
-            const url = 'http://localhost:8000/tasks';
-            const response = axios.post(
-                url,
-                {},
-                {
-                params: {
-                    user_id: newTodo.user,
+                console.log(newTodo);
+                const url = 'http://localhost:8000/tasks';
+                const response = await axios.post(url, {
+                    user_id: newTodo.user_id,
                     task: newTodo.task,
                     status: newTodo.status,
-                }
-                }
-            )
-            console.log("Response: ", response);
-            addTodo({
-                task: newTodo.task,
-                status: newTodo.status,
-                isUpdating: newTodo.isUpdating,
-            });
-            console.log("Added New Todo: ", newTodo);
+                });
+
+                addTodo({
+                    task: newTodo.task,
+                    status: newTodo.status,
+                    isUpdating: newTodo.isUpdating,
+                });
+                console.log("Added New Todo: ", newTodo);
             }
             catch (error) {
             if (error.response) {
@@ -193,7 +206,7 @@ function ToDoApp() {
         {},
         {
             params: {
-            user_id: user_id,
+            user_id: user,
             task: todo.task,
             status: !todo.status,
             }

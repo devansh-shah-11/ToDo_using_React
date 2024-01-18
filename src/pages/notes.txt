@@ -1,4 +1,0 @@
-Name, email, password during signup
-
-use secrets.sessiontoken to generate a token for the user
-
