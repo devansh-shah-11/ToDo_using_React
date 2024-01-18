@@ -35,10 +35,9 @@ const Login = () => {
     }
     
     useEffect(() => {
-    loadUser(); // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadUser(); 
     }, []);
     
-    // This function gets fired when the user clicks on the "Login" button.
     const onSubmit = async (event) => {
     try {
         const user = await emailPasswordLogin(form.email, form.password);

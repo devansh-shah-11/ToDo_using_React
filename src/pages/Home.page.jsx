@@ -5,15 +5,12 @@ import { UserContext } from '../contexts/user.context.jsx';
 const Home = () => {
     const { logOutUser } = useContext(UserContext);
     const { user } = useContext(UserContext);
-    // This function is called when the user clicks the "Logout" button.
+
     const logOut = async () => {
     try {
-        // Calling the logOutUser function from the user context.
         console.log("Logging out user: ", user);
         console.log(logOutUser)
         const loggedOut = await logOutUser(user);
-        // Now we will refresh the page, and the user will be logged out and
-        // redirected to the login page because of the <PrivateRoute /> component.
         if (loggedOut) {
         window.location.reload(true);
         }
@@ -24,7 +21,7 @@ const Home = () => {
     
     return (
     <>
-        <h1>Welcome to ToDo App</h1>
+        <h1>Welcome to your ToDo App</h1>
         <Button variant="contained" onClick={logOut}>Logout</Button>
     </>
     )

@@ -15,10 +15,6 @@ function ToDoApp() {
             console.log("Fetching tasks for user: ", user);
             const url = `http://localhost:8000/tasks?user_id=${user}`;
             const response = await axios.get(url);
-            // const url = `http://localhost:8000/tasks`;
-            // const response = await axios.get(url, {
-            //     user_id: user 
-            // });
             console.log("Response: ", response);
             let newTodos = [];
             for (let [task, status] of Object.entries(response.data)) {
@@ -32,19 +28,6 @@ function ToDoApp() {
             }
             console.log("Existing Todos: ", newTodos);
             setTodos(newTodos);
-            // console.log("Fetched Tasks: ", response.data.tasks);
-            // let newTodos = [];
-            // for (let [task, status] of Object.entries(response.data.tasks)) {
-            //     console.log("Task: ", task);
-            //     const newTodo = {
-            //     task: task,
-            //     status: status,
-            //     isUpdating: false,
-            //     };
-            //     newTodos.push(newTodo);
-            // }
-            // console.log("New Todos: ", newTodos);
-            // setTodos(newTodos);
         } catch (error) {
         console.error("Error fetching tasks: ", error);
         }
