@@ -6,8 +6,50 @@ import { UserContext } from "./contexts/user.context.jsx";
 function ToDoApp() {
 
     const [task, setTodo] = useState([]); 
-
     const { user } = useContext(UserContext);
+    const { logOutUser } = useContext(UserContext);
+    const [filter, setFilter] = useState("All");
+    const [todos, setTodos] = useState([]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            checkTokenExpiration();
+        }, 60000); // checks every minute
+    
+        // cleanup function
+        return () => clearInterval(intervalId);
+    }, []);
+    
+    async function checkTokenExpiration() {
+        const url = `http://localhost:8000/token/`;
+        const response = await axios.get(url, {
+            params: {
+                session_token: user,
+            }
+        });
+        console.log("Response: ", response);
+        const currentTime = new Date().getTime();
+        console.log("Response Data: ", response)
+        const expirationTime = new Date(response.data.expiration_time).getTime();
+        console.log("Current Time: ", currentTime);
+        console.log("Expiration Time: ", expirationTime);
+        if (currentTime > expirationTime) {
+            try {
+                console.log("Token expired. Logging out user: ", user);
+                const loggedOut = await logOutUser(user);
+                if (loggedOut) {
+                    window.location.reload(true);
+                    return true;
+                }
+            } catch (error) {
+                alert(error)
+                return false;
+            }
+        }
+        else {  
+            return false;
+        }
+    }
 
     useEffect(() => {
     const fetchTasks = async () => {
@@ -35,6 +77,19 @@ function ToDoApp() {
     fetchTasks();
     }, [user]);
 
+    const filteredTodos = todos.filter((todo) => {
+        console.log("Filter: ", filter);
+        console.log("Todo: ", todos);
+        if (filter === "All") {
+            return true;
+        }
+        if (filter === "Completed") {
+            return todo.status;
+        }
+        if (filter === "Pending") {
+            return !todo.status;
+        }
+    });
 
     const AddTodo = ({ addTodo }) => {
         
@@ -98,47 +153,48 @@ function ToDoApp() {
         const updateRef = useRef(null);
 
         const handleUpdate = () => {
-        const originalTodo = updateRef.current;
-        console.log("Original: ", originalTodo);
-        const url = `http://localhost:8000/tasks/`;
-        axios.put(
-            url,
-            {},
-            {
-            params: {
-                user_id: user,
-                task: originalTodo,
+            
+            const originalTodo = updateRef.current;
+            console.log("Original: ", originalTodo);
+            const url = `http://localhost:8000/tasks/`;
+            axios.put(
+                url,
+                {},
+                {
+                params: {
+                    user_id: user,
+                    task: originalTodo,
+                    status: todo.status,
+                    newtask: newTodo,
+                }
+                }
+            )
+            updateTodo({
+                originalTodo,
+                task: newTodo,
                 status: todo.status,
-                newtask: newTodo,
-            }
-            }
-        )
-        updateTodo({
-            originalTodo,
-            task: newTodo,
-            status: todo.status,
-        });
+            });
         };  
     
         const handleDelete = async () => {
-        const toDelete = todo.task;
-        console.log("Deleting: ", toDelete);
-        const url = `http://localhost:8000/tasks/${toDelete}`;
-        try{
-            const response = await axios.delete(
-            url,
-            {
-                params: {
-                user_id: user,
+            const toDelete = todo.task;
+            console.log("Deleting: ", toDelete);
+            const url = `http://localhost:8000/tasks/${toDelete}`;
+            try{
+                const response = await axios.delete(
+                url,
+                {
+                    params: {
+                    user_id: user,
+                    }
                 }
+                )
+                console.log("Response: ", response);
+                deleteTodo(todo);
             }
-            )
-            console.log("Response: ", response);
-            deleteTodo(todo);
-        }
-        catch (error) {
-            console.error("Error deleting todo: ", error);
-        }
+            catch (error) {
+                console.error("Error deleting todo: ", error);
+            }
         }
     
         return (
@@ -175,13 +231,12 @@ function ToDoApp() {
         )
     }
     
-    const [todos, setTodos] = useState([])
-    
     const addTodo = (newTodo) => {
         setTodos([...todos, newTodo]);
     }
     
     const toggleComplete = (todo) => {
+
         console.log("Toggling: ", todo);
         const url = `http://localhost:8000/tasks/${todo.task}`;
         axios.put(
@@ -216,20 +271,30 @@ function ToDoApp() {
         console.log("Deleted: ", todoToDelete);
     }
     
+    const handleFilterChange = (filter) => {
+        setFilter(filter);
+    }
+
+
     return (
         <>
-        <Home />
-        <h1>ToDo App</h1>
-        <AddTodo addTodo={addTodo} />
-        {todos.map((todo, index) => (
-            <Todo
-            key={index}
-            todo={todo} 
-            toggleComplete={toggleComplete}
-            updateTodo={updateTodo}
-            deleteTodo={deleteTodo}
-            />
-        ))}
+            <Home />
+            <h1>ToDo App</h1>
+            <div>
+                <button onClick={() => handleFilterChange("All")}>All</button>
+                <button onClick={() => handleFilterChange("Completed")}>Completed</button>
+                <button onClick={() => handleFilterChange("Pending")}>Pending</button>
+            </div>
+            <AddTodo addTodo={addTodo} />
+            {filteredTodos.map((todo, index) => (
+                <Todo
+                key={index}
+                todo={todo} 
+                toggleComplete={toggleComplete}
+                updateTodo={updateTodo}
+                deleteTodo={deleteTodo}
+                />
+            ))}
         </>
     )
 }  

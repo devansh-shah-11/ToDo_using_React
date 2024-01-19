@@ -9,7 +9,6 @@ const Home = () => {
     const logOut = async () => {
     try {
         console.log("Logging out user: ", user);
-        console.log(logOutUser)
         const loggedOut = await logOutUser(user);
         if (loggedOut) {
         window.location.reload(true);

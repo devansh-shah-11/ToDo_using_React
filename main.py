@@ -7,6 +7,7 @@ from bson import json_util
 import json
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
+from datetime import datetime, timedelta, timezone
 
 mongodb_uri ='mongodb://localhost:27017/'
 port = 8000
@@ -58,16 +59,6 @@ async def signup(form: SignupForm):
     except Exception as e:
         return {"error": str(e)}
 
-
-# @app.post('/users/signup')
-# async def create_user(name: str, email: EmailStr, password: str):
-#     user = User(name=name, email=email, password=password, tasks={})
-#     for u in db.users.find():
-#         if u['email'] == email:
-#             return {"message": "User already exists"}
-#     db.users.insert_one(user.dict(by_alias=True))
-#     return {"message": "User created successfully"}
-
 @app.post('/users/login')
 async def login(form: LoginForm):
     user = db.users.find_one({"email": form.email})
@@ -76,31 +67,32 @@ async def login(form: LoginForm):
     if user['password'] != form.password:
         return {"message": "Incorrect password"}
     session_token = secrets.token_hex(16)
-    db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token}})
-    return {"message": "Login successful", "session_token": session_token}
+    expiration_time = datetime.now(timezone.utc) + timedelta(minutes=20)
+    db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
+    return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
 
 @app.post('/users/logout')
 async def logout(user_logout: UserLogout):
     user = db.users.find_one({"session_token": user_logout.session_token})
     if not user:
         return {"message": "User does not exist"}
-    db.users.update_one({'session_token': user_logout.session_token}, {'$set': {'session_token': ''}})
+    db.users.update_one({'session_token': user_logout.session_token}, {'$set': {'session_token': '', 'expiration_time': ''}})
     return {"message": "Logout successful"}
-
-# @app.post('/users/login')
-# async def login(email: EmailStr, password: str):
-#     for u in db.users.find():
-#         if u['email'] == email:
-#             if u['password'] == password:
-#                 return {"message": "Login successful"}
-#             else:
-#                 return {"message": "Incorrect password"}
-#     return {"message": "User does not exist"}
 
 class Task(BaseModel):
     user_id: str
     task: str
     status: bool
+
+def retrieve_expiration_time(session_token: str):
+    user = db.users.find_one({"session_token": session_token})
+    if not user:
+        return {"message": "User does not exist"}
+    return {"message": "User exists", "expiration_time": user['expiration_time']}
+
+@app.get('/token')
+def expiration_time(session_token: str):
+    return retrieve_expiration_time(session_token)
 
 @app.post('/tasks')
 async def create_task(task: Task):
