@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Home from './pages/Home.page.jsx';
 import { UserContext } from "./contexts/user.context.jsx";
+import './TodoApp.css';
+
 
 function ToDoApp() {
 
@@ -141,7 +143,7 @@ function ToDoApp() {
             value={task}
             onChange={(e) => setTodo(e.target.value)}
             />
-            <button type="submit">Add Todo</button>
+            <button class="add-task-button" type="submit">Add Todo</button>
         </form>
         )
     }
@@ -209,13 +211,13 @@ function ToDoApp() {
                     toggleComplete(todo);
                 }}
                 />
-                <button onClick={() => {
-                setIsUpdating(true);
-                updateRef.current = todo.task;
+                <button className = "task-button" onClick={() => {
+                    setIsUpdating(true);
+                    updateRef.current = todo.task;
                 }}
                 >Edit</button>
 
-                <button onClick={handleDelete}>Delete</button>
+                <button className = "task-button" onClick={handleDelete}>Delete</button>
             </>
             ) : (
             <>
@@ -224,7 +226,7 @@ function ToDoApp() {
                 value={newTodo}
                 onChange={(e) => setNewTodo (e.target.value)}
                 />
-                <button onClick={handleUpdate}>Save Changes</button>
+                <button className = "task-button" onClick={handleUpdate}>Save Changes</button>
             </>
             )}
         </div>
@@ -280,12 +282,15 @@ function ToDoApp() {
         <>
             <Home />
             <h1>ToDo App</h1>
-            <div>
-                <button onClick={() => handleFilterChange("All")}>All</button>
-                <button onClick={() => handleFilterChange("Completed")}>Completed</button>
-                <button onClick={() => handleFilterChange("Pending")}>Pending</button>
+            <div className='button-container'>
+                <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
+                <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
+                <button className="all-category-button" onClick={() => handleFilterChange("Pending")}>Pending</button>
             </div>
-            <AddTodo addTodo={addTodo} />
+            <div className='add-todo'>
+                <AddTodo addTodo={addTodo} />
+            </div>
+            
             {filteredTodos.map((todo, index) => (
                 <Todo
                 key={index}

@@ -1,0 +1,64 @@
+body {
+    background-color: lightblue;
+    font-family: Arial, sans-serif;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.add-todo{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.all-category-button {
+    background-color: pink;
+    color: blueviolet;
+    text-align: center;
+}
+
+.task-button {
+    background-color: green;
+    color: maroon;
+    text-align: center;
+}
+
+.add-task-button {
+    background-color: red;
+    color: yellow;
+    text-align: center;
+}
+
+button {
+    background-color: #af4caa;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.todo-item {
+    background-color: #fff;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.todo-item.completed {
+    text-decoration: line-through;
+}
