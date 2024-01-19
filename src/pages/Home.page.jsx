@@ -20,8 +20,9 @@ const Home = () => {
     
     return (
     <>
-        <h1>Welcome to your ToDo App</h1>
-        <Button variant="contained" onClick={logOut}>Logout</Button>
+        <div className="logout-button-container">
+            <Button variant="contained" onClick={logOut}>Logout</Button>
+        </div>
     </>
     )
 }

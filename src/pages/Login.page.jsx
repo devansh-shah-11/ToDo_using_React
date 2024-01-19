@@ -2,6 +2,7 @@ import { Button, TextField } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/user.context.jsx";
+import "./Login.css";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -54,31 +55,35 @@ const Login = () => {
     }
     };
     
-    return <form style={{ display: "flex", flexDirection: "column", maxWidth: "300px", margin: "auto" }}>
-    <h1>Login</h1>
-    <TextField
-        label="Email"
-        type="email"
-        variant="outlined"
-        name="email"
-        value={form.email}
-        onChange={onFormInputChange}
-        style={{ marginBottom: "1rem" }}
-    />
-    <TextField
-        label="Password"
-        type="password"
-        variant="outlined"
-        name="password"
-        value={form.password}
-        onChange={onFormInputChange}
-        style={{ marginBottom: "1rem" }}
-    />
-    <Button variant="contained" color="primary" onClick={onSubmit}>
-        Login
-    </Button>
-    <p>Don't have an account? <Link to="/signup">Signup</Link></p>
-    </form>
+        return (
+            <div className="login-container">
+                <form style={{ display: "flex", flexDirection: "column", maxWidth: "300px", margin: "auto" }}>
+                <h1>Login</h1>
+                <TextField
+                    label="Email"
+                    type="email"
+                    variant="outlined"
+                    name="email"
+                    value={form.email}
+                    onChange={onFormInputChange}
+                    style={{ marginBottom: "1rem" }}
+                />
+                <TextField
+                    label="Password"
+                    type="password"
+                    variant="outlined"
+                    name="password"
+                    value={form.password}
+                    onChange={onFormInputChange}
+                    style={{ marginBottom: "1rem" }}
+                />
+                <Button variant="contained" color="primary" onClick={onSubmit}>
+                    Login
+                </Button>
+                <p>Don't have an account? <Link to="/signup">Signup</Link></p>
+                </form>
+            </div>
+        );
 }
 
 export default Login;

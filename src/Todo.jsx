@@ -203,21 +203,25 @@ function ToDoApp() {
         <div>
             {!isUpdating ? (
             <>
-                <span>{todo.task}</span>
-                <input
-                type='checkbox'
-                checked={todo.status}
-                onChange={() => {
-                    toggleComplete(todo);
-                }}
-                />
-                <button className = "task-button" onClick={() => {
-                    setIsUpdating(true);
-                    updateRef.current = todo.task;
-                }}
-                >Edit</button>
+                <div id="todo-container">
+                    <div id="task">{todo.task}</div>
+                    <div id="actions-container">
+                        <input
+                            type='checkbox'
+                            checked={todo.status}
+                            onChange={() => {
+                                toggleComplete(todo);
+                            }}
+                        />
+                        <button className="edit-button" onClick={() => {
+                            setIsUpdating(true);
+                            updateRef.current = todo.task;
+                        }}
+                        >Edit</button>
 
-                <button className = "task-button" onClick={handleDelete}>Delete</button>
+                        <button className="delete-button" onClick={handleDelete}>Delete</button>
+                    </div>
+                </div>
             </>
             ) : (
             <>
@@ -281,7 +285,7 @@ function ToDoApp() {
     return (
         <>
             <Home />
-            <h1>ToDo App</h1>
+            <div className='header'> Welcome to your To-Do List! </div>
             <div className='button-container'>
                 <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
                 <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
