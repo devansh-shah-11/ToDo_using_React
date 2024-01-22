@@ -4,11 +4,6 @@ body {
     font-size: 16px;
 }
 
-.button-container {
-    display: flex;
-    margin-left: 0px;
-}
-
 .header {
     display: flex;
     align-items: center;
@@ -17,45 +12,12 @@ body {
     font-size: 40px;
 }
 
-#todo-container {
-    display: 'flex';
-    align-items: 'center';
+
+/* for all, completed and pending */
+.button-container {
     display: flex;
-    align-items: center;
-    justify-content: left;
-    width: 20%; 
-    margin-left: 0px;
-}
-
-#index{
-    display: flex;
-    flex-direction: column;
-    width: 20%; 
-    margin: auto; 
-    color: darkblue;
-
-}
-
-#task {
-    flex-grow: 1;
-    text-align: left;
-    color: darkgreen;
-}
-
-#actions-container {
-    display: flex;
-    align-items: center;
-    margin-left: 100px;
-}
-
-#myCheckboxDiv, .edit-button, .delete-button {
-    margin-right: 10px;
-}
-
-.add-todo{
-    margin-top: 20px;
-    display: flex;
-    margin-left: 50px;
+    width: 50%;
+    justify-content: space-between;
 }
 
 .all-category-button {
@@ -65,6 +27,44 @@ body {
     text-align: center;
     justify-content: center;
     margin-left: 30px;
+}
+
+/* for displaying the todos */
+#todo-container {
+    display: flex;
+    align-items: center;
+    width: 50%; 
+    justify-content: space-between;
+}
+
+/* #index{
+    text-align: left;
+    margin-right: 50px;
+} */
+
+#index, #myCheckboxDiv, #task, #actions-container {
+    flex: 1;
+    text-align: center;
+}
+
+.edit-button, .delete-button {
+    margin-right: 30px;
+}
+
+/* #actions-container {
+    display: flex;
+    align-items: center;
+    margin-left: 100px;
+} */
+
+
+/* for the add todo form */
+.add-todo{
+    margin: auto;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .task-button {
