@@ -83,6 +83,7 @@ class Task(BaseModel):
     user_id: str
     task: str
     status: bool
+    deadline: datetime
 
 def retrieve_expiration_time(session_token: str):
     user = db.users.find_one({"session_token": session_token})
@@ -100,11 +101,10 @@ async def create_task(task: Task):
     if not user:
         return {"message": f"user does not exist"}
     tasks = user.get('tasks', {})
-    print(tasks)
-    if task.task in tasks:
-        return {"message": f"task {task} already exists"}
-    tasks[task.task] = task.status
-    print(tasks)
+    for existing_task in tasks:
+        if existing_task == task.task:
+            raise HTTPException(status_code=400, detail="Task already exists")
+    tasks[task.task] = [task.status, task.deadline]
     db.users.update_one({'session_token': task.user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task.task} created successfully"}
 
@@ -123,34 +123,36 @@ async def get_tasks(user_id: str):
 # async def get_tasks(user_id: str):
 #     return fetch_tasks(user_id)
 
+# To change the status or deadline of a task
 @app.put('/tasks/{task}')
-async def update_task(user_id: str, task: str, status: bool):
+async def update_task(user_id: str, task: str, status: bool, deadline: datetime):
     user = db.users.find_one({'session_token': user_id})
     if not user:
         return {"message": f"user does not exist"}
-    tasks = user.get('tasks', {})
-    if task not in tasks:
-        return {"message": f"task {task} does not exist"}
-    tasks[task] = status
-    db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
+    tasks = user.get('tasks', [])
+    for t in tasks:
+        if t == task:
+            tasks[t] = [status, deadline]
+            db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} updated successfully"}
 
 @app.put('/tasks')
-async def update_task(user_id: str, task: str, status: bool, newtask: str):
+async def update_task(user_id: str, task: str, status: bool, newtask: str, deadline: datetime):
     user = db.users.find_one({'session_token': user_id})
     if not user:
         return {"message": f"user does not exist"}
-    tasks = user.get('tasks', {})
+    tasks = user.get('tasks', [])
+    updated_tasks = {}
     if task not in tasks:
         return {"message": f"task {task} does not exist"}
-    updated_tasks = {}
     for key in tasks.keys():
         if key == task:
-            updated_tasks[newtask] = status
+            updated_tasks[newtask] = [status, deadline]
         else:
             updated_tasks[key] = tasks[key]
     db.users.update_one({'session_token': user_id}, {'$set': {'tasks': updated_tasks}})
     return {"message": f"task {task} updated successfully"}
+
 
 @app.delete('/tasks/{task}')
 async def delete_task(user_id: str, task: str):

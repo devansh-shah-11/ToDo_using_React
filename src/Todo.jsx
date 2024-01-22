@@ -12,11 +12,12 @@ function ToDoApp() {
     const { logOutUser } = useContext(UserContext);
     const [filter, setFilter] = useState("All");
     const [todos, setTodos] = useState([]);
+    const [deadline, setDeadline] = useState('');
 
     useEffect(() => {
         const intervalId = setInterval(() => {
             checkTokenExpiration();
-        }, 60000); // checks every minute
+        }, 600000); // checks every minute
     
         // cleanup function
         return () => clearInterval(intervalId);
@@ -65,7 +66,8 @@ function ToDoApp() {
                 console.log("Task: ", task);
                 const newTodo = {
                     task: task,
-                    status: status,
+                    status: status[0],
+                    deadline: status[1]['$date'],
                     isUpdating: false,
                 };
                 newTodos.push(newTodo);
@@ -96,55 +98,61 @@ function ToDoApp() {
     const AddTodo = ({ addTodo }) => {
         
         const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log("Task: ", task);
-        if (task === ''){
-            alert("Task cannot be empty");
-        }
-        else{
-            const newTodo = {
-            user_id: user,
-            task: task,
-            status: false,
-            isUpdating: false,
-            };
-            try {
-                console.log(newTodo);
-                const url = 'http://localhost:8000/tasks';
-                const response = await axios.post(url, {
-                    user_id: newTodo.user_id,
-                    task: newTodo.task,
-                    status: newTodo.status,
-                });
+            e.preventDefault();
+            console.log("Task: ", task);
+            if (task === ''){
+                alert("Task cannot be empty");
+            }
+            else{
+                const newTodo = {
+                    user_id: user,
+                    task: task,
+                    status: false,
+                    isUpdating: false,
+                };
+                try {
+                    const isoDeadline = new Date(deadline).toISOString();
+                    console.log(newTodo);
+                    const url = 'http://localhost:8000/tasks';
+                    const response = await axios.post(url, {
+                        user_id: newTodo.user_id,
+                        task: newTodo.task,
+                        status: newTodo.status,
+                        deadline: isoDeadline,
+                    });
 
-                addTodo({
-                    task: newTodo.task,
-                    status: newTodo.status,
-                    isUpdating: newTodo.isUpdating,
-                });
-                console.log("Added New Todo: ", newTodo);
+                    addTodo({
+                        task: newTodo.task,
+                        status: newTodo.status,
+                        deadline: isoDeadline,
+                        isUpdating: newTodo.isUpdating,
+                    });
+                    console.log("Added New Todo: ", newTodo);
+                    setTodo('');
+                    setDeadline('');
+                }
+                catch (error) {
+                    if (error.response) {
+                        console.error("Error Response Data: ", error.response.data);
+                    } else if (error.request) {
+                        console.error("No response received");
+                    } else {
+                        console.error("Error Setting Up Request: ", error.message);
+                    }
+                }
             }
-            catch (error) {
-            if (error.response) {
-                console.error("Error Response Data: ", error.response.data);
-            } else if (error.request) {
-                console.error("No response received");
-            } else {
-                console.error("Error Setting Up Request: ", error.message);
-            }
-            }
-        }
         }
 
         return (
-        <form onSubmit={handleSubmit}>
-            <input
-            type="text"
-            value={task}
-            onChange={(e) => setTodo(e.target.value)}
-            />
-            <button class="add-task-button" type="submit">Add Todo</button>
-        </form>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={task}
+                    onChange={(e) => setTodo(e.target.value)}
+                />
+                <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                <button class="add-task-button" type="submit">Add Todo</button>
+            </form>
         )
     }
     
