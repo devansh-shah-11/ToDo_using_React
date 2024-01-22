@@ -166,3 +166,19 @@ async def delete_task(user_id: str, task: str):
     del tasks[task]
     db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} deleted successfully"}
+
+
+def find_task_date(user_id: str, date: datetime):
+    user = db.users.find_one({'session_token': user_id})
+    if not user:
+        return {"message": f"user does not exist"}
+    tasks = user.get('tasks', {})
+    tasks_by_date = {}
+    for task in tasks:
+        if tasks[task][1].strftime("%d-%m-%Y") == date:
+            tasks_by_date[task] = tasks[task][0]
+    return tasks_by_date
+
+@app.get('/tasks/{date}')
+async def get_tasks_by_date(user_id: str, date: str):
+    return find_task_date(user_id, date)

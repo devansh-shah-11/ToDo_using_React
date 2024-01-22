@@ -3,7 +3,7 @@ import axios from 'axios';
 import Home from './pages/Home.page.jsx';
 import { UserContext } from "./contexts/user.context.jsx";
 import './TodoApp.css';
-
+import TasksCalendar from './TasksDue.jsx'
 
 function ToDoApp() {
 
@@ -332,27 +332,32 @@ function ToDoApp() {
             <div className='add-todo'>
                 <AddTodo addTodo={addTodo} />
             </div>
-            
-            <div className='button-container'>
-                <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
-                <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
-                <button className="all-category-button" onClick={() => handleFilterChange("Pending")}>Pending</button>
+            <div className="container1">
+                <div className="space-between"></div>
+                <div className="tasks-and-buttons">
+                    <div className='button-container'>
+                        <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
+                        <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
+                        <button className="all-category-button" onClick={() => handleFilterChange("Pending")}>Pending</button>
+                    </div>
+                    <br></br>
+                    <br></br>
+                    {filteredTodos.map((todo, index) => (
+                        <Todo
+                        key={index}
+                        index={index+1}
+                        todo={todo} 
+                        toggleComplete={toggleComplete}
+                        updateTodo={updateTodo}
+                        deleteTodo={deleteTodo}
+                        />
+                    ))}
+                </div>
+                <div className="space-between"></div>
+                <div className="space-between"></div>
+                <div id='task-calendar'><TasksCalendar todos={filteredTodos}/></div>
+                <div className="space-between"></div>
             </div>
-
-            <br></br>
-            <br></br>
-            <br></br>
-
-            {filteredTodos.map((todo, index) => (
-                <Todo
-                key={index}
-                index={index+1}
-                todo={todo} 
-                toggleComplete={toggleComplete}
-                updateTodo={updateTodo}
-                deleteTodo={deleteTodo}
-                />
-            ))}
         </>
     )
 }  
