@@ -1,0 +1,18 @@
+1) the flow - index, checkbox, task, edit, delete buttons
+2) css for edit button 
+3) all-completed-pending below addtask
+4) authenticating user via gmail on signup page
+5) signup --> login --> dashboard
+6) search bar - pattern matching (in case lots of tasks) - dyamic rendering based on the matches
+7) add reminder - take deadline as input and snooze of 10 mins before
+8) on hovering over the task / buttons - zoom it - highlight it
+9) add calendar option
+10) all categories and tasks - left align
+11) on input - add date and time
+12) on the right, show todos for a particular date
+13) only on hovering on the calendar - all todos for that day should be displayed [calendar view should also fix in the box]
+
+use JWTs for authentication
+
+all tasks - 1 box - categories tab, and tasks tab
+add nested classes for tasks and categories
