@@ -148,7 +148,7 @@ function ToDoApp() {
         )
     }
     
-    const Todo = ({ todo, toggleComplete, updateTodo, deleteTodo }) => {
+    const Todo = ({ index, todo, toggleComplete, updateTodo, deleteTodo }) => {
     
         const [newTodo, setNewTodo] = useState(todo.task);
         const [isUpdating, setIsUpdating] = useState(false);
@@ -204,15 +204,16 @@ function ToDoApp() {
             {!isUpdating ? (
             <>
                 <div id="todo-container">
+                    <div id="index">{index}</div>
+                    <input
+                        type='checkbox'
+                        checked={todo.status}
+                        onChange={() => {
+                            toggleComplete(todo);
+                        }}
+                    />
                     <div id="task">{todo.task}</div>
                     <div id="actions-container">
-                        <input
-                            type='checkbox'
-                            checked={todo.status}
-                            onChange={() => {
-                                toggleComplete(todo);
-                            }}
-                        />
                         <button className="edit-button" onClick={() => {
                             setIsUpdating(true);
                             updateRef.current = todo.task;
@@ -286,18 +287,25 @@ function ToDoApp() {
         <>
             <Home />
             <div className='header'> Welcome to your To-Do List! </div>
+            
+            <div className='add-todo'>
+                <AddTodo addTodo={addTodo} />
+            </div>
+            
             <div className='button-container'>
                 <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
                 <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
                 <button className="all-category-button" onClick={() => handleFilterChange("Pending")}>Pending</button>
             </div>
-            <div className='add-todo'>
-                <AddTodo addTodo={addTodo} />
-            </div>
-            
+
+            <br></br>
+            <br></br>
+            <br></br>
+
             {filteredTodos.map((todo, index) => (
                 <Todo
                 key={index}
+                index={index+1}
                 todo={todo} 
                 toggleComplete={toggleComplete}
                 updateTodo={updateTodo}
