@@ -136,6 +136,7 @@ async def update_task(user_id: str, task: str, status: bool, deadline: datetime)
             db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} updated successfully"}
 
+# To change the name or deadline of the task
 @app.put('/tasks')
 async def update_task(user_id: str, task: str, status: bool, newtask: str, deadline: datetime):
     user = db.users.find_one({'session_token': user_id})

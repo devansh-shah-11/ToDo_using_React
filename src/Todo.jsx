@@ -164,6 +164,8 @@ function ToDoApp() {
 
         const handleUpdate = () => {
             
+            const Newdeadline = new Date(deadline).toISOString();
+            console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
             const url = `http://localhost:8000/tasks/`;
@@ -175,6 +177,7 @@ function ToDoApp() {
                     user_id: user,
                     task: originalTodo,
                     status: todo.status,
+                    deadline: Newdeadline,
                     newtask: newTodo,
                 }
                 }
@@ -183,6 +186,7 @@ function ToDoApp() {
                 originalTodo,
                 task: newTodo,
                 status: todo.status,
+                deadline: Newdeadline,
             });
         };  
     
@@ -221,10 +225,12 @@ function ToDoApp() {
                         }}
                     />
                     <div id="task">{todo.task}</div>
+                    <div id="deadline">{todo.deadline}</div>
                     <div id="actions-container">
                         <button className="edit-button" onClick={() => {
                             setIsUpdating(true);
                             updateRef.current = todo.task;
+                            setDeadline(deadline);
                         }}
                         >Edit</button>
 
@@ -234,12 +240,38 @@ function ToDoApp() {
             </>
             ) : (
             <>
-                <input
+                <div id="todo-container">
+                    <div id="index">{index}</div>
+                    <input
+                        type='checkbox'
+                        checked={todo.status}
+                        onChange={() => {
+                            toggleComplete(todo);
+                        }}
+                    />
+                    <input
+                        type='text'
+                        value={newTodo}
+                        onChange={(e) => setNewTodo (e.target.value)}
+                    />
+                    
+                    <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+
+                    <button className = "task-button" onClick={() => {
+                        handleUpdate();
+                        setIsUpdating(false);
+                    }
+                    }>Save Changes</button>
+
+                    <button className="delete-button" onClick={handleDelete}>Delete</button>
+
+                </div>
+                {/* <input
                 type='text'
                 value={newTodo}
                 onChange={(e) => setNewTodo (e.target.value)}
                 />
-                <button className = "task-button" onClick={handleUpdate}>Save Changes</button>
+                <button className = "task-button" onClick={handleUpdate}>Save Changes</button> */}
             </>
             )}
         </div>
@@ -259,9 +291,10 @@ function ToDoApp() {
         {},
         {
             params: {
-            user_id: user,
-            task: todo.task,
-            status: !todo.status,
+                user_id: user,
+                task: todo.task,
+                status: !todo.status,
+                deadline: todo.deadline,
             }
         }
         )
@@ -275,9 +308,9 @@ function ToDoApp() {
     const updateTodo = (updatedTodo) => {
         console.log("Updating: ", updatedTodo);
         setTodos(
-        todos.map((t) =>
-            t.task === updatedTodo.originalTodo ? { ...t, task: updatedTodo.task} : t
-        )
+            todos.map((t) =>
+                t.task === updatedTodo.originalTodo ? { ...t, task: updatedTodo.task, deadline: updatedTodo.deadline } : t
+            )
         );
     }
     
