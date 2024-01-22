@@ -46,7 +46,8 @@ export const UserProvider = ({ children }) => {
             );
             console.log("Response: ", response)
             console.log("Successfully registered!");
-            return emailPasswordLogin(email, password);
+            return response;
+            // return emailPasswordLogin(email, password);
         } catch (error) {
             console.log("Error registering user: ", error);
             throw error;

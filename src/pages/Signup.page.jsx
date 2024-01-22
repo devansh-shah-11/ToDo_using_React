@@ -26,9 +26,12 @@ const Signup = () => {
     
     const onSubmit = async () => {
     try {
-        const user = await emailPasswordSignup(form.name, form.email, form.password);
-        if (user) {
-        redirectNow();
+        const response = await emailPasswordSignup(form.name, form.email, form.password);
+        if (response.status === 200){
+            redirectNow('/login');
+        }
+        else{
+            alert("Error signing up. Try again!");
         }
     } catch (error) {
         alert(error);
