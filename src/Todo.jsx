@@ -145,13 +145,17 @@ function ToDoApp() {
 
         return (
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={task}
-                    onChange={(e) => setTodo(e.target.value)}
-                />
-                <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
-                <button class="add-task-button" type="submit">Add Todo</button>
+                
+                <div id='add-task-display'>
+                    <input
+                        type="text"
+                        value={task}
+                        onChange={(e) => setTodo(e.target.value)}
+                    />
+                    <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <button class="add-task-button" type="submit">Add Todo</button>
+                </div>
+                
             </form>
         )
     }

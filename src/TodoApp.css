@@ -75,20 +75,23 @@ body {
     margin-right: 10px;
 }
 
-/* for the add todo form */
+#add-task-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Adjust this to your needs */
+}
+
+/* for the add todo form
 .add-todo{
     margin: auto;
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-}
+} */
 
-.task-button {
-    background-color: green;
-    color: maroon;
-    text-align: center;
-}
+
 
 .add-task-button {
     background-color: red;
@@ -113,25 +116,6 @@ button {
 
 button:hover {
     background-color: #45a049;
-}
-
-.todo-item {
-    background-color: #fff;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.todo-item.completed {
-    text-decoration: line-through;
-}
-
-.todo-item .actions {
-    display: flex;
-    align-items: center;
 }
 
 .logout-button-container {
