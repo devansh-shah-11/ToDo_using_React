@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import './TasksDue.css';
+import 'react-calendar/dist/Calendar.css';
 
 function TasksCalendar({ todos: filteredTodos }) {
     const [selectedDate, setSelectedDate] = useState(new Date());

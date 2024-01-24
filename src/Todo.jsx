@@ -340,7 +340,7 @@ function ToDoApp() {
             <Home />
             <div className='header'> 
             <div className="title-container">
-                <h1>Welcome to your To-Do list!</h1>
+                <h2>Welcome to your To-Do list!</h2>
             </div>
                 <Button variant="contained" onClick={logOut} className='logout-btn'>Logout</Button>
             </div>
@@ -351,11 +351,26 @@ function ToDoApp() {
             <div className="container1">
                 <div className="space-between"></div>
                 <div className="tasks-and-buttons">
-                    <div className='button-container'>
-                        <button className="all-category-button" onClick={() => handleFilterChange("All")}>All</button>
-                        <button className="all-category-button" onClick={() => handleFilterChange("Completed")}>Completed</button>
-                        <button className="all-category-button" onClick={() => handleFilterChange("Pending")}>Pending</button>
-                    </div>
+                <div className='button-container'>
+                    <button 
+                        className={`all-category-button ${filter === "All" ? "selected" : ""}`} 
+                        onClick={() => setFilter("All")}
+                    >
+                        All
+                    </button>
+                    <button 
+                        className={`all-category-button ${filter === "Completed" ? "selected" : ""}`} 
+                        onClick={() => setFilter("Completed")}
+                    >
+                        Completed
+                    </button>
+                    <button 
+                        className={`all-category-button ${filter === "Pending" ? "selected" : ""}`} 
+                        onClick={() => setFilter("Pending")}
+                    >
+                        Pending
+                    </button>
+                </div>
                     <br></br>
                     <br></br>
                     {filteredTodos.map((todo, index) => (
