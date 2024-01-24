@@ -7,9 +7,24 @@ body {
 .header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 20px;
-    justify-content: center;
     font-size: 40px;
+    background-color: lightblue;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.title-container {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.logout-btn {
+    margin-left: auto;
 }
 
 .container1{
@@ -146,4 +161,5 @@ button:hover {
     background: #b3d4fc;
     color: #000;
 }
+
 

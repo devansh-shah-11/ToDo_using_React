@@ -1,4 +1,4 @@
-.login-container {
+.signup-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -10,11 +10,4 @@
 
 .center-text {
     text-align: center;
-}
-
-.fb-login-btn {
-    align-items: center;
-    display: flex;
-    justify-content: center;
-
 }

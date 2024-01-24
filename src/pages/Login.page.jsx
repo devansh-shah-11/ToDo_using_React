@@ -76,7 +76,7 @@ const Login = () => {
     return (
         <div className="login-container">
             <form style={{ display: "flex", flexDirection: "column", maxWidth: "300px", margin: "auto" }} onSubmit={onSubmit}>
-                <h1>Login</h1>
+                <h1 className="center-text">Login</h1>
                 <TextField
                     label="Email"
                     type="email"
@@ -97,27 +97,28 @@ const Login = () => {
                     style={{ marginBottom: "1rem" }}
                     required
                 />
-                <Button variant="contained" color="primary" type="submit">
+                <Button variant="contained" color="primary" type="submit" className="login-btn">
                     Login
                 </Button>
+                <br></br>
+                <div className="fb-login-btn">
+                    <FacebookLogin
+                        appId="813331880600210"
+                        fields="name,email,picture"
+                        onSuccess={(response) => {
+                            console.log('Login Success!', response);
+                        }}
+                        onFail={(error) => {
+                            console.log('Login Failed!', error);
+                        }}
+                        onProfileSuccess={(response) => {
+                            ProfileSuccess(response);
+                            console.log('Get Profile Success!', response);
+                        }}
+                    />
+                </div>
                 <p>Don't have an account? <Link to="/signup">Signup</Link></p>
             </form>
-            <div className="facebook-login">
-                <FacebookLogin
-                    appId="813331880600210"
-                    fields="name,email,picture"
-                    onSuccess={(response) => {
-                        console.log('Login Success!', response);
-                    }}
-                    onFail={(error) => {
-                        console.log('Login Failed!', error);
-                    }}
-                    onProfileSuccess={(response) => {
-                        ProfileSuccess(response);
-                        console.log('Get Profile Success!', response);
-                    }}
-                />
-            </div>
         </div>
     );
 }

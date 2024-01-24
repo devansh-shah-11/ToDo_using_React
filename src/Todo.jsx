@@ -3,6 +3,7 @@ import axios from 'axios';
 import Home from './pages/Home.page.jsx';
 import { UserContext } from "./contexts/user.context.jsx";
 import './TodoApp.css';
+import { Button } from '@mui/material'
 import TasksCalendar from './TasksDue.jsx'
 
 function ToDoApp() {
@@ -327,11 +328,28 @@ function ToDoApp() {
         setFilter(filter);
     }
 
+    const logOut = async () => {
+        try {
+            console.log("Logging out user: ", user);
+            const loggedOut = await logOutUser(user);
+            if (loggedOut) {
+            window.location.reload(true);
+            }
+        } catch (error) {
+            alert(error)
+        }
+    }
+    
 
     return (
         <>
             <Home />
-            <div className='header'> Welcome to your To-Do List! </div>
+            <div className='header'> 
+            <div className="title-container">
+                <h1>Welcome to your To-Do list!</h1>
+            </div>
+                <Button variant="contained" onClick={logOut} className='logout-btn'>Logout</Button>
+            </div>
             
             <div className='add-todo'>
                 <AddTodo addTodo={addTodo} />
