@@ -149,11 +149,13 @@ function ToDoApp() {
                 
                 <div id='add-task-display'>
                     <input
+                        className='input-field'
                         type="text"
                         value={task}
+                        placeholder='Enter Task'
                         onChange={(e) => setTodo(e.target.value)}
                     />
-                    <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <input className='input-field' type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
                     <button class="add-task-button" type="submit">Add Todo</button>
                 </div>
                 
@@ -267,16 +269,8 @@ function ToDoApp() {
                         setIsUpdating(false);
                     }
                     }>Save Changes</button>
-
                     <button className="delete-button" onClick={handleDelete}>Delete</button>
-
                 </div>
-                {/* <input
-                type='text'
-                value={newTodo}
-                onChange={(e) => setNewTodo (e.target.value)}
-                />
-                <button className = "task-button" onClick={handleUpdate}>Save Changes</button> */}
             </>
             )}
         </div>

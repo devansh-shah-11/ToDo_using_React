@@ -25,14 +25,12 @@ body {
 
 .logout-btn {
     margin-left: auto;
+    border-radius: 4px;
 }
 
 .container1{
     display: flex;
     justify-content: space-between;
-    /* border: 2px solid brown; */
-    /* padding: auto; */
-    /* margin: auto; */
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
 }
 
@@ -43,7 +41,7 @@ body {
 .tasks-and-buttons {
     width: 48%;
     margin-left:10px;
-    border: 1px solid magenta;
+    border: 3px solid black;
     padding: 10px;
     margin: auto;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
@@ -52,16 +50,18 @@ body {
 /* for all, completed and pending */
 .button-container {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
 }
 
 .all-category-button {
     margin-top: 50px;
-    background-color: pink;
-    color: blueviolet;
+    background-color: lightblue;
+    border-radius: 4px;
+    border: 1px solid black;
+    color: #000;
     text-align: center;
-    justify-content: center;
-    margin-left: 30px;
+    align-items: center;
 }
 
 /* for displaying the todos */
@@ -71,18 +71,14 @@ body {
     justify-content: space-between;
 }
 
-/* #index{
-    text-align: left;
-    margin-right: 50px;
-} */
-
 #task {
     transition: transform 0.3s ease;
 }
 
 #task:hover {
-    transform: scale(1.1);
+    transform: scale(1.2);
     background-color: yellow; 
+    color: darkblue =;
 }
 
 
@@ -94,32 +90,35 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%; /* Adjust this to your needs */
+    width: 100%; 
+
 }
 
-/* for the add todo form
-.add-todo{
-    margin: auto;
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-} */
+.input-field {
+    height: 40px; 
+    margin-left: 10px;
+    background-color: lightblue;
+    color: black;
+    border: 2px solid black;
+    border-radius: 4px;
 
 
+}
 
 .add-task-button {
-    background-color: red;
-    color: yellow;
+    height: 40px;
+    background-color: lightblue;
+    color: black;
     text-align: center;
     margin-top:50px;
     margin-bottom: 50px;
+    margin-left: 10px;
 }
 
 button {
-    background-color: #af4caa;
-    border: none;
-    color: white;
+    background-color: lightblue;
+    border: 2 px solid blue;
+    color: black;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
@@ -143,7 +142,7 @@ button:hover {
 /* Tasks due in calendar */
 
 #task-calendar {
-    width: 48%;
+    width: 50%;
     margin-top: 20px;
     display: flex;
     align-items: center;
@@ -161,5 +160,3 @@ button:hover {
     background: #b3d4fc;
     color: #000;
 }
-
-
