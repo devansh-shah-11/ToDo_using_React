@@ -43,6 +43,10 @@ class User(BaseModel):
     password: str
     tasks: dict
 
+class FBLogin(BaseModel):
+    accessToken: str
+    email: str
+    name: str
 
 @app.post("/users/signup")
 async def signup(form: SignupForm):
@@ -69,6 +73,19 @@ async def login(form: LoginForm):
     session_token = secrets.token_hex(16)
     expiration_time = datetime.now(timezone.utc) + timedelta(minutes=20)
     db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
+    return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
+
+@app.post('/users/facebooklogin')
+async def facebooklogin(form: FBLogin):
+    print(form)
+    user = db.users.find_one({"email": form.email})
+    print(user)
+    session_token = secrets.token_hex(16)
+    expiration_time = datetime.now(timezone.utc) + timedelta(minutes=60)
+    if user:
+        db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
+    else:
+        db.users.insert_one({"name": form.name, "email": form.email, "session_token": session_token, "expiration_time": expiration_time})
     return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
 
 @app.post('/users/logout')

@@ -9,7 +9,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     
-    const { user, fetchUser, emailPasswordLogin , facebookLogin} = useContext(UserContext);
+    const { user, fetchUser, emailPasswordLogin , facebooklogin} = useContext(UserContext);
     
     const [form, setForm] = useState({
         email: "",
@@ -56,9 +56,14 @@ const Login = () => {
     loadUser(); 
     }, []);
     
-    const onProfileSuccess = async (response) => {
+    const ProfileSuccess = async (response) => {
         try{
-                const user = response.accessToken;
+                console.log("Response ", response);
+                const accessToken = response.id;
+                const email = response.email;
+                const name = response.name;
+                const user = await facebooklogin(accessToken, email, name);
+                console.log("accessToken: ", user);
                 if (user) {
                     redirectNow();
                 }
@@ -100,14 +105,15 @@ const Login = () => {
             <div className="facebook-login">
                 <FacebookLogin
                     appId="813331880600210"
+                    fields="name,email,picture"
                     onSuccess={(response) => {
                         console.log('Login Success!', response);
-                        onProfileSuccess(response);
                     }}
                     onFail={(error) => {
                         console.log('Login Failed!', error);
                     }}
                     onProfileSuccess={(response) => {
+                        ProfileSuccess(response);
                         console.log('Get Profile Success!', response);
                     }}
                 />
