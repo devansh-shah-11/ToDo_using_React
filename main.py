@@ -48,6 +48,7 @@ class FBLogin(BaseModel):
     email: str
     name: str
 
+# for signing up the user
 @app.post("/users/signup")
 async def signup(form: SignupForm):
     try:
@@ -63,6 +64,7 @@ async def signup(form: SignupForm):
     except Exception as e:
         return {"error": str(e)}
 
+# for logging in the user using Account Credentials
 @app.post('/users/login')
 async def login(form: LoginForm):
     user = db.users.find_one({"email": form.email})
@@ -75,6 +77,7 @@ async def login(form: LoginForm):
     db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
     return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
 
+# for logging in user via facebook
 @app.post('/users/facebooklogin')
 async def facebooklogin(form: FBLogin):
     print(form)
@@ -88,6 +91,7 @@ async def facebooklogin(form: FBLogin):
         db.users.insert_one({"name": form.name, "email": form.email, "session_token": session_token, "expiration_time": expiration_time})
     return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
 
+# for logging out user
 @app.post('/users/logout')
 async def logout(user_logout: UserLogout):
     user = db.users.find_one({"session_token": user_logout.session_token})
@@ -102,6 +106,7 @@ class Task(BaseModel):
     status: bool
     deadline: datetime
 
+# retrieving expiry time
 def retrieve_expiration_time(session_token: str):
     user = db.users.find_one({"session_token": session_token})
     if not user:
@@ -112,6 +117,7 @@ def retrieve_expiration_time(session_token: str):
 def expiration_time(session_token: str):
     return retrieve_expiration_time(session_token)
 
+# for creating new task
 @app.post('/tasks')
 async def create_task(task: Task):
     user = db.users.find_one({'session_token': task.user_id})
@@ -125,6 +131,7 @@ async def create_task(task: Task):
     db.users.update_one({'session_token': task.user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task.task} created successfully"}
 
+# fetching the existing tasks
 def fetch_tasks(user_id: str):
     user = db.users.find_one({'session_token': user_id})
     if user:
@@ -136,9 +143,6 @@ def fetch_tasks(user_id: str):
 async def get_tasks(user_id: str):
     return fetch_tasks(user_id)
 
-# @app.get('/tasks')
-# async def get_tasks(user_id: str):
-#     return fetch_tasks(user_id)
 
 # To change the status or deadline of a task
 @app.put('/tasks/{task}')
@@ -171,7 +175,7 @@ async def update_task(user_id: str, task: str, status: bool, newtask: str, deadl
     db.users.update_one({'session_token': user_id}, {'$set': {'tasks': updated_tasks}})
     return {"message": f"task {task} updated successfully"}
 
-
+#Deleting a task
 @app.delete('/tasks/{task}')
 async def delete_task(user_id: str, task: str):
     user = db.users.find_one({'session_token': user_id})
@@ -184,7 +188,7 @@ async def delete_task(user_id: str, task: str):
     db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} deleted successfully"}
 
-
+# Fetching tasks by date
 def find_task_date(user_id: str, date: datetime):
     user = db.users.find_one({'session_token': user_id})
     if not user:
