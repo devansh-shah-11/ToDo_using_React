@@ -111,6 +111,33 @@ body {
     margin-right: 10px;
 }
 
+#index1 {
+    flex: 1;
+    text-align: center;
+}
+
+#statusbox1 {
+    flex: 1;
+    text-align: center;
+}
+
+#task1 {
+    transition: transform 0.3s ease;
+    flex: 2;
+    text-align: center;
+}
+
+.task-button, .delete-button {
+    flex: 1;
+    text-align: center;
+}
+
+#deadline1 {
+    flex: 3;
+    text-align: center;
+}
+
+
 #add-task-display {
     display: flex;
     align-items: center;

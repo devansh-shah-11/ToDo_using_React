@@ -171,7 +171,7 @@ function ToDoApp() {
 
         const handleUpdate = () => {
             
-            const Newdeadline = new Date(deadline).toISOString().split("T")[0];
+            const Newdeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
@@ -249,8 +249,9 @@ function ToDoApp() {
             ) : (
             <>
                 <div id="todo-container">
-                    <div id="index">{index}</div>
+                    <div id="index1">{index}</div>
                     <input
+                        id='statusbox1'
                         type='checkbox'
                         checked={todo.status}
                         onChange={() => {
@@ -259,18 +260,19 @@ function ToDoApp() {
                     />
                     <input
                         type='text'
+                        id='task1'
                         value={newTodo}
                         onChange={(e) => setNewTodo (e.target.value)}
                     />
                     
-                    <input type='date' id='deadline' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <input type='date' id='deadline1' value={deadline} onChange={e => setDeadline(e.target.value) }/>
 
                     <button className = "task-button" onClick={() => {
                         handleUpdate();
                         setIsUpdating(false);
                     }
                     }>Save Changes</button>
-                    <button className="delete-button" onClick={handleDelete}>Delete</button>
+                    <button className="delete-button1" onClick={handleDelete}>Delete</button>
                 </div>
             </>
             )}
