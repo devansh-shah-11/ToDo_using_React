@@ -104,7 +104,7 @@ class Task(BaseModel):
     user_id: str
     task: str
     status: bool
-    deadline: datetime
+    deadline: str
 
 # retrieving expiry time
 def retrieve_expiration_time(session_token: str):

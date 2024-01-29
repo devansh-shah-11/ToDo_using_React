@@ -68,7 +68,7 @@ function ToDoApp() {
                 const newTodo = {
                     task: task,
                     status: status[0],
-                    deadline: status[1]['$date'],
+                    deadline: status[1]['$date'] ? status[1]['$date'].split("T")[0] : "-",
                     isUpdating: false,
                 };
                 newTodos.push(newTodo);
@@ -112,7 +112,7 @@ function ToDoApp() {
                     isUpdating: false,
                 };
                 try {
-                    const isoDeadline = new Date(deadline).toISOString();
+                    const isoDeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
                     console.log(newTodo);
                     const url = 'http://localhost:8000/tasks';
                     const response = await axios.post(url, {
@@ -171,7 +171,7 @@ function ToDoApp() {
 
         const handleUpdate = () => {
             
-            const Newdeadline = new Date(deadline).toISOString();
+            const Newdeadline = new Date(deadline).toISOString().split("T")[0];
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
@@ -226,6 +226,7 @@ function ToDoApp() {
                     <div id="index">{index}</div>
                     <input
                         type='checkbox'
+                        id='statusbox'
                         checked={todo.status}
                         onChange={() => {
                             toggleComplete(todo);
@@ -262,7 +263,7 @@ function ToDoApp() {
                         onChange={(e) => setNewTodo (e.target.value)}
                     />
                     
-                    <input type='date' id='date' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <input type='date' id='deadline' value={deadline} onChange={e => setDeadline(e.target.value) }/>
 
                     <button className = "task-button" onClick={() => {
                         handleUpdate();
@@ -316,10 +317,6 @@ function ToDoApp() {
     const deleteTodo = (todoToDelete) => {
         setTodos(todos.filter(todo => todo !== todoToDelete));
         console.log("Deleted: ", todoToDelete);
-    }
-    
-    const handleFilterChange = (filter) => {
-        setFilter(filter);
     }
 
     const logOut = async () => {
