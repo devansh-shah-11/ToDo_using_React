@@ -29,6 +29,7 @@ const Login = () => {
     //added below new
     const onSubmit = async (event) => {
         event.preventDefault();
+        // this prevents reloading 
         try {
             const user = await emailPasswordLogin(form.email, form.password);
             if (user) {
