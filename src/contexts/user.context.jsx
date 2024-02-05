@@ -84,10 +84,9 @@ export const UserProvider = ({ children }) => {
 
     const logOutUser = async (session_token) => {
         try {
-            const url = 'http://localhost:8000/users/logout';
-            const response = axios.post(url, {
-                session_token: session_token,
-            });
+            const url = `http://127.0.0.1:8000/users/logout?token=${session_token}`;
+            const response = await axios.post(url);
+            setUser(null);
             console.log("Successfully logged out!");
             return response;
         } catch (error) {

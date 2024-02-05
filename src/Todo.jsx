@@ -173,8 +173,8 @@ function ToDoApp() {
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
-            
-            const url = `http://127.0.0.1:8000/tasks?token=${user}`;
+
+            const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
             const response = axios.put( url, {
                 task: todo.task,
                 newTask: newTodo,

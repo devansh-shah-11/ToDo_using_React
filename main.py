@@ -63,7 +63,6 @@ def create_access_token(data:dict):
 
 async def get_current_user(token: str):
     try:
-        print("hello")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         print(payload)
         # user = db.users.find_one({"email": payload.get("email")})
@@ -131,6 +130,7 @@ async def read_users_me(current_user: str = Depends(get_current_user)):
 # for logging out user
 @app.post('/users/logout')
 async def logout(current_user: str = Depends(get_current_user)):
+    print(current_user['email'])
     db.users.update_one({'email': current_user['email']}, {'$set': {'session_token': '', 'expiration_time': ''}})
     return {"message": "Logout successful"}
 
