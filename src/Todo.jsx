@@ -55,7 +55,6 @@ function ToDoApp() {
         }
     }
 
-    useEffect(() => {
     const fetchTasks = async () => {
         try {
             console.log("Fetching tasks for user: ", user);
@@ -85,8 +84,6 @@ function ToDoApp() {
         console.error("Error fetching tasks: ", error);
         }
     };
-    fetchTasks();
-    }, [user]);
 
     const filteredTodos = todos.filter((todo) => {
         console.log("Filter: ", filter);
@@ -238,6 +235,7 @@ function ToDoApp() {
                         task: todo.task,
                     }
                 });
+                await fetchTasks();
             }catch (error) {
                 console.error("Error deleting todo: ", error);
             }
@@ -351,6 +349,9 @@ function ToDoApp() {
         }
     }
     
+    useEffect(() => {
+        fetchTasks();
+    }, []);
 
     return (
         <>
