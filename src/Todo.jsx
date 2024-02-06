@@ -59,8 +59,14 @@ function ToDoApp() {
     const fetchTasks = async () => {
         try {
             console.log("Fetching tasks for user: ", user);
-            const url = `http://localhost:8000/tasks?token=${user}`;
-            const response = await axios.get(url);
+            // const url = `http://localhost:8000/tasks?token=${user}`;
+            // const response = await axios.get(url);
+            const url = 'http://localhost:3001/gettasks'
+            const response = await axios.get(url, {
+                headers: {
+                    token: user,
+                }
+            });
             console.log("Response: ", response);
             let newTodos = [];
             for (let [task, status] of Object.entries(response.data)) {
@@ -113,13 +119,23 @@ function ToDoApp() {
                 try {
                     const isoDeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
                     console.log(newTodo);
-                    const url = `http://localhost:8000/tasks?token=${user}`;
+                    // const url = `http://localhost:8000/tasks?token=${user}`;
+                    // const response = await axios.post(url, {
+                    //     task: newTodo.task,
+                    //     status: newTodo.status,
+                    //     deadline: isoDeadline,
+                    // });
+                    const url = 'http://localhost:3001/addtask'
                     const response = await axios.post(url, {
-                        task: newTodo.task,
-                        status: newTodo.status,
-                        deadline: isoDeadline,
+                        headers: {
+                            token: user,
+                        },
+                        params: {
+                            task: newTodo.task,
+                            status: newTodo.status,
+                            deadline: isoDeadline,
+                        }
                     });
-
                     addTodo({
                         task: newTodo.task,
                         status: newTodo.status,
@@ -167,19 +183,32 @@ function ToDoApp() {
         const [isUpdating, setIsUpdating] = useState(false);
         const updateRef = useRef(null);
 
-        const handleUpdate = () => {
+        const handleUpdate = async () => {
             
             const Newdeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
 
-            const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
-            const response = axios.put( url, {
-                task: todo.task,
-                newTask: newTodo,
-                status: !todo.status,
-                deadline: todo.deadline,
+            // const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
+            // const response = axios.put( url, {
+            //     task: todo.task,
+            //     newTask: newTodo,
+            //     status: !todo.status,
+            //     deadline: todo.deadline,
+            // });
+
+            const url = 'http://localhost:3001/updatetask'
+            const response = await axios.put(url, {
+                headers: {
+                    token: user,
+                },
+                params: {
+                    task: todo.task,
+                    utask: newTodo,
+                    status: newTodo.status,
+                    deadline: todo.deadline,
+                }
             });
 
             updateTodo({
@@ -189,17 +218,27 @@ function ToDoApp() {
                 deadline: Newdeadline,
             });
         };  
-    
+        
         const handleDelete = async () => {
             const toDelete = todo.task;
             console.log("Deleting: ", toDelete);
-            const url = `http://localhost:8000/tasks/${toDelete}?token=${user}`;
+            // const url = `http://localhost:8000/tasks/${toDelete}?token=${user}`;
+            // try{
+            //     const response = await axios.delete(url);
+            //     console.log("Response: ", response);
+            //     deleteTodo(todo);
+            // }
+            const url = 'http://localhost:3001/deletetask'
             try{
-                const response = await axios.delete(url);
-                console.log("Response: ", response);
-                deleteTodo(todo);
-            }
-            catch (error) {
+                const response = await axios.delete(url, {
+                    headers: {
+                        token: user,
+                    },
+                    params: {
+                        task: todo.task,
+                    }
+                });
+            }catch (error) {
                 console.error("Error deleting todo: ", error);
             }
         }
