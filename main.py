@@ -1,13 +1,16 @@
-from typing import Union
+from typing import Optional
 from pydantic import BaseModel, EmailStr
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from passlib.context import CryptContext
 import numpy as np
 from pymongo import MongoClient
-from bson import json_util
 import json
+import jwt
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
 from datetime import datetime, timedelta, timezone
+import os
+from dotenv import load_dotenv
 
 mongodb_uri ='mongodb://localhost:27017/'
 port = 8000
@@ -24,6 +27,11 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
+
+# Loading the secret key from .env file
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 class SignupForm(BaseModel):
     name: str
@@ -48,6 +56,25 @@ class FBLogin(BaseModel):
     email: str
     name: str
 
+
+def create_access_token(data:dict):
+    to_encode = data.copy()
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_user(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(payload)
+        # user = db.users.find_one({"email": payload.get("email")})
+        email: str = payload.get("email")
+        print(email)
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        user = db.users.find_one({"email": email})
+        return user
+    except:
+        return None
+
 # for signing up the user
 @app.post("/users/signup")
 async def signup(form: SignupForm):
@@ -59,6 +86,8 @@ async def signup(form: SignupForm):
             if len(form.password) < 3:
                 return {"message": "Password must be at least 3 characters long"}
             else:
+                hashed_password = CryptContext(schemes=["bcrypt"]).hash(form.password)
+                form.password = hashed_password
                 db.users.insert_one(form.dict(by_alias=True))
                 return {"message": "User created successfully"}
     except Exception as e:
@@ -70,9 +99,11 @@ async def login(form: LoginForm):
     user = db.users.find_one({"email": form.email})
     if not user:
         return {"message": "User does not exist"}
-    if user['password'] != form.password:
+    password_context = CryptContext(schemes=["bcrypt"])
+    if not password_context.verify(form.password, user['password']):
         return {"message": "Incorrect password"}
-    session_token = secrets.token_hex(16)
+    # session_token = secrets.token_hex(16) # for generating random session token
+    session_token = create_access_token(form.dict(by_alias=True))
     expiration_time = datetime.now(timezone.utc) + timedelta(minutes=20)
     db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
     return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
@@ -83,7 +114,8 @@ async def facebooklogin(form: FBLogin):
     print(form)
     user = db.users.find_one({"email": form.email})
     print(user)
-    session_token = secrets.token_hex(16)
+    # session_token = secrets.token_hex(16)
+    session_token = create_access_token(form.dict(by_alias=True))
     expiration_time = datetime.now(timezone.utc) + timedelta(minutes=60)
     if user:
         db.users.update_one({'email': form.email}, {'$set': {'session_token': session_token, 'expiration_time': expiration_time}})
@@ -91,36 +123,38 @@ async def facebooklogin(form: FBLogin):
         db.users.insert_one({"name": form.name, "email": form.email, "session_token": session_token, "expiration_time": expiration_time})
     return {"message": "Login successful", "session_token": session_token, "expiration_time": expiration_time}
 
+@app.get("/users/me/")
+async def read_users_me(current_user: str = Depends(get_current_user)):
+    return current_user
+
 # for logging out user
 @app.post('/users/logout')
-async def logout(user_logout: UserLogout):
-    user = db.users.find_one({"session_token": user_logout.session_token})
-    if not user:
-        return {"message": "User does not exist"}
-    db.users.update_one({'session_token': user_logout.session_token}, {'$set': {'session_token': '', 'expiration_time': ''}})
+async def logout(current_user: str = Depends(get_current_user)):
+    print(current_user['email'])
+    db.users.update_one({'email': current_user['email']}, {'$set': {'session_token': '', 'expiration_time': ''}})
     return {"message": "Logout successful"}
 
 class Task(BaseModel):
-    user_id: str
     task: str
+    newTask: Optional[str] = None
     status: bool
     deadline: str
 
 # retrieving expiry time
-def retrieve_expiration_time(session_token: str):
-    user = db.users.find_one({"session_token": session_token})
+def retrieve_expiration_time(current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({"email": current_user['email']})
     if not user:
         return {"message": "User does not exist"}
     return {"message": "User exists", "expiration_time": user['expiration_time']}
 
 @app.get('/token')
-def expiration_time(session_token: str):
-    return retrieve_expiration_time(session_token)
+async def get_token(current_user: str = Depends(get_current_user)):
+    return retrieve_expiration_time(current_user)
 
 # for creating new task
 @app.post('/tasks')
-async def create_task(task: Task):
-    user = db.users.find_one({'session_token': task.user_id})
+async def create_task(task: Task, current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({'email': current_user['email']})
     if not user:
         return {"message": f"user does not exist"}
     tasks = user.get('tasks', {})
@@ -128,64 +162,67 @@ async def create_task(task: Task):
         if existing_task == task.task:
             raise HTTPException(status_code=400, detail="Task already exists")
     tasks[task.task] = [task.status, task.deadline]
-    db.users.update_one({'session_token': task.user_id}, {'$set': {'tasks': tasks}})
+    db.users.update_one({'email': current_user['email']}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task.task} created successfully"}
 
 # fetching the existing tasks
-def fetch_tasks(user_id: str):
-    user = db.users.find_one({'session_token': user_id})
-    if user:
-        user_dict = json.loads(json_util.dumps(user))
-        return user_dict['tasks']
-    raise HTTPException(status_code=404, detail="User not found")
+def fetch_tasks(current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({'email': current_user['email']})
+    if not user:
+        return {"message": f"user does not exist"}
+    tasks = user.get('tasks', {})
+    return tasks
 
 @app.get('/tasks')
-async def get_tasks(user_id: str):
-    return fetch_tasks(user_id)
+async def get_tasks(current_user: str = Depends(get_current_user)):
+    return fetch_tasks(current_user)
 
-
-# To change the status or deadline of a task
-@app.put('/tasks/{task}')
-async def update_task(user_id: str, task: str, status: bool, deadline: datetime):
-    user = db.users.find_one({'session_token': user_id})
+@app.put('/tasks')
+async def update_task(task: Task, current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({'email': current_user['email']})
+    print(user, current_user['email'])
     if not user:
         return {"message": f"user does not exist"}
-    tasks = user.get('tasks', [])
-    for t in tasks:
-        if t == task:
-            tasks[t] = [status, deadline]
-            db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
-    return {"message": f"task {task} updated successfully"}
+    print("Now fetching tasks")
+    tasks = user.get('tasks', {})
+    if task.task in tasks:
+        if task.newTask:
+            tasks[task.newTask] = tasks.pop(task.task)
+        else:
+            tasks[task.task] = [task.status, task.deadline]
+        db.users.update_one({'email': current_user['email']}, {'$set': {'tasks': tasks}})
+        return {"message": f"task {task.task} updated successfully"}
+    return {"message": f"task {task.task} not found"}
 
 # To change the name or deadline of the task
-@app.put('/tasks')
-async def update_task(user_id: str, task: str, status: bool, newtask: str, deadline: datetime):
-    user = db.users.find_one({'session_token': user_id})
-    if not user:
-        return {"message": f"user does not exist"}
-    tasks = user.get('tasks', [])
-    updated_tasks = {}
-    if task not in tasks:
-        return {"message": f"task {task} does not exist"}
-    for key in tasks.keys():
-        if key == task:
-            updated_tasks[newtask] = [status, deadline]
-        else:
-            updated_tasks[key] = tasks[key]
-    db.users.update_one({'session_token': user_id}, {'$set': {'tasks': updated_tasks}})
-    return {"message": f"task {task} updated successfully"}
+# @app.put('/tasks')
+# async def update_task(task: str, newtask: str, deadline: datetime, current_user: str = Depends(get_current_user)):
+#     user = db.users.find_one({'email': current_user['email']})
+#     if not user:
+#         return {"message": f"user does not exist"}
+#     tasks = user.get('tasks', [])
+#     updated_tasks = {}
+#     if task not in tasks:
+#         return {"message": f"task {task} does not exist"}
+#     for key in tasks.keys():
+#         if key == task:
+#             updated_tasks[newtask] = tasks[key]
+#         else:
+#             updated_tasks[key] = tasks[key]
+#     db.users.update_one({'email': current_user['email']}, {'$set': {'tasks': updated_tasks}})
+#     return {"message": f"task {task} updated successfully"}
 
 #Deleting a task
 @app.delete('/tasks/{task}')
-async def delete_task(user_id: str, task: str):
-    user = db.users.find_one({'session_token': user_id})
+async def delete_task(task: str, current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({'email': current_user['email']})
     if not user:
         return {"message": f"user does not exist"}
     tasks = user.get('tasks', {})
     if task not in tasks:
         return {"message": f"task {task} does not exist"}
     del tasks[task]
-    db.users.update_one({'session_token': user_id}, {'$set': {'tasks': tasks}})
+    db.users.update_one({'email': current_user['email']}, {'$set': {'tasks': tasks}})
     return {"message": f"task {task} deleted successfully"}
 
 # Fetching tasks by date

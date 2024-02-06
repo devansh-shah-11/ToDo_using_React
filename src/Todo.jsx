@@ -59,7 +59,7 @@ function ToDoApp() {
     const fetchTasks = async () => {
         try {
             console.log("Fetching tasks for user: ", user);
-            const url = `http://localhost:8000/tasks?user_id=${user}`;
+            const url = `http://localhost:8000/tasks?token=${user}`;
             const response = await axios.get(url);
             console.log("Response: ", response);
             let newTodos = [];
@@ -106,7 +106,6 @@ function ToDoApp() {
             }
             else{
                 const newTodo = {
-                    user_id: user,
                     task: task,
                     status: false,
                     isUpdating: false,
@@ -114,9 +113,8 @@ function ToDoApp() {
                 try {
                     const isoDeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
                     console.log(newTodo);
-                    const url = 'http://localhost:8000/tasks';
+                    const url = `http://localhost:8000/tasks?token=${user}`;
                     const response = await axios.post(url, {
-                        user_id: newTodo.user_id,
                         task: newTodo.task,
                         status: newTodo.status,
                         deadline: isoDeadline,
@@ -175,20 +173,15 @@ function ToDoApp() {
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
-            const url = `http://localhost:8000/tasks/`;
-            axios.put(
-                url,
-                {},
-                {
-                params: {
-                    user_id: user,
-                    task: originalTodo,
-                    status: todo.status,
-                    deadline: Newdeadline,
-                    newtask: newTodo,
-                }
-                }
-            )
+
+            const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
+            const response = axios.put( url, {
+                task: todo.task,
+                newTask: newTodo,
+                status: !todo.status,
+                deadline: todo.deadline,
+            });
+
             updateTodo({
                 originalTodo,
                 task: newTodo,
@@ -200,16 +193,9 @@ function ToDoApp() {
         const handleDelete = async () => {
             const toDelete = todo.task;
             console.log("Deleting: ", toDelete);
-            const url = `http://localhost:8000/tasks/${toDelete}`;
+            const url = `http://localhost:8000/tasks/${toDelete}?token=${user}`;
             try{
-                const response = await axios.delete(
-                url,
-                {
-                    params: {
-                    user_id: user,
-                    }
-                }
-                )
+                const response = await axios.delete(url);
                 console.log("Response: ", response);
                 deleteTodo(todo);
             }
@@ -287,19 +273,12 @@ function ToDoApp() {
     const toggleComplete = (todo) => {
 
         console.log("Toggling: ", todo);
-        const url = `http://localhost:8000/tasks/${todo.task}`;
-        axios.put(
-        url,
-        {},
-        {
-            params: {
-                user_id: user,
-                task: todo.task,
-                status: !todo.status,
-                deadline: todo.deadline,
-            }
-        }
-        )
+        const url = `http://127.0.0.1:8000/tasks?token=${user}`;
+        const response = axios.put( url, {
+            task: todo.task,
+            status: !todo.status,
+            deadline: todo.deadline,
+        });
         setTodos(
         todos.map((t) =>
             t === todo ? { ...t, status: !t.status} : t
