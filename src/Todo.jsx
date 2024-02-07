@@ -13,7 +13,20 @@ function ToDoApp() {
     const { logOutUser } = useContext(UserContext);
     const [filter, setFilter] = useState("All");
     const [todos, setTodos] = useState([]);
+
+
     const [deadline, setDeadline] = useState('');
+    const [editDeadline, setEditDeadline] = useState('');
+
+    useEffect(() => {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = today.getFullYear();
+        const todayDate = yyyy + '-' + mm + '-' + dd;
+        setDeadline(todayDate);
+    }
+    , []);
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -25,9 +38,15 @@ function ToDoApp() {
     }, []);
     
     async function checkTokenExpiration() {
-        const url = `http://localhost:8000/token/`;
+        // const url = `http://localhost:8000/token/`;
+        // const response = await axios.get(url, {
+        //     params: {
+        //         session_token: user,
+        //     }
+        // });
+        const url = 'http://localhost:3001/tokenexpiry'
         const response = await axios.get(url, {
-            params: {
+            headers: {
                 session_token: user,
             }
         });
@@ -55,20 +74,26 @@ function ToDoApp() {
         }
     }
 
-    useEffect(() => {
     const fetchTasks = async () => {
         try {
             console.log("Fetching tasks for user: ", user);
-            const url = `http://localhost:8000/tasks?token=${user}`;
-            const response = await axios.get(url);
-            console.log("Response: ", response);
+            // const url = `http://localhost:8000/tasks?token=${user}`;
+            // const response = await axios.get(url);
+            const url = 'http://localhost:3001/gettasks'
+            const response = await axios.get(url, {
+                headers: {
+                    token: user,
+                }
+            });
+            console.log("the tasks tadadada")
             let newTodos = [];
             for (let [task, status] of Object.entries(response.data)) {
                 console.log("Task: ", task);
+                console.log("Status: ", status);
                 const newTodo = {
                     task: task,
                     status: status[0],
-                    deadline: status[1]['$date'] ? status[1]['$date'].split("T")[0] : "-",
+                    deadline: status[1] ? status[1] : "-",
                     isUpdating: false,
                 };
                 newTodos.push(newTodo);
@@ -79,8 +104,6 @@ function ToDoApp() {
         console.error("Error fetching tasks: ", error);
         }
     };
-    fetchTasks();
-    }, [user]);
 
     const filteredTodos = todos.filter((todo) => {
         console.log("Filter: ", filter);
@@ -113,13 +136,23 @@ function ToDoApp() {
                 try {
                     const isoDeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
                     console.log(newTodo);
-                    const url = `http://localhost:8000/tasks?token=${user}`;
+                    // const url = `http://localhost:8000/tasks?token=${user}`;
+                    // const response = await axios.post(url, {
+                    //     task: newTodo.task,
+                    //     status: newTodo.status,
+                    //     deadline: isoDeadline,
+                    // });
+                    const url = 'http://localhost:3001/addtask'
                     const response = await axios.post(url, {
-                        task: newTodo.task,
-                        status: newTodo.status,
-                        deadline: isoDeadline,
+                        headers: {
+                            token: user,
+                        },
+                        params: {
+                            task: newTodo.task,
+                            status: newTodo.status,
+                            deadline: isoDeadline,
+                        }
                     });
-
                     addTodo({
                         task: newTodo.task,
                         status: newTodo.status,
@@ -128,7 +161,15 @@ function ToDoApp() {
                     });
                     console.log("Added New Todo: ", newTodo);
                     setTodo('');
-                    setDeadline('');
+                    // setDeadline('');
+                    // set today's date as default deadline
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    const yyyy = today.getFullYear();
+                    const todayDate = yyyy + '-' + mm + '-' + dd;
+                    setDeadline(todayDate);
+                    
                 }
                 catch (error) {
                     if (error.response) {
@@ -167,19 +208,31 @@ function ToDoApp() {
         const [isUpdating, setIsUpdating] = useState(false);
         const updateRef = useRef(null);
 
-        const handleUpdate = () => {
-            
-            const Newdeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
+        const handleUpdate = async () => {
+            const Newdeadline = editDeadline ? new Date(editDeadline).toISOString().split("T")[0] : "-";
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
 
-            const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
-            const response = axios.put( url, {
-                task: todo.task,
-                newTask: newTodo,
-                status: !todo.status,
-                deadline: todo.deadline,
+            // const url = `http://127.0.0.1:8000/tasks?session_token=${user}`;
+            // const response = axios.put( url, {
+            //     task: todo.task,
+            //     newTask: newTodo,
+            //     status: !todo.status,
+            //     deadline: todo.deadline,
+            // });
+
+            const url = 'http://localhost:3001/updatetask'
+            const response = await axios.put(url, {
+                headers: {
+                    token: user,
+                },
+                params: {
+                    task: todo.task,
+                    utask: newTodo,
+                    status: !todo.status,
+                    deadline: Newdeadline,
+                }
             });
 
             updateTodo({
@@ -189,17 +242,28 @@ function ToDoApp() {
                 deadline: Newdeadline,
             });
         };  
-    
+        
         const handleDelete = async () => {
             const toDelete = todo.task;
             console.log("Deleting: ", toDelete);
-            const url = `http://localhost:8000/tasks/${toDelete}?token=${user}`;
+            // const url = `http://localhost:8000/tasks/${toDelete}?token=${user}`;
+            // try{
+            //     const response = await axios.delete(url);
+            //     console.log("Response: ", response);
+            //     deleteTodo(todo);
+            // }
+            const url = 'http://localhost:3001/deletetask'
             try{
-                const response = await axios.delete(url);
-                console.log("Response: ", response);
-                deleteTodo(todo);
-            }
-            catch (error) {
+                const response = await axios.delete(url, {
+                    headers: {
+                        token: user,
+                    },
+                    params: {
+                        task: todo.task,
+                    }
+                });
+                await fetchTasks();
+            }catch (error) {
                 console.error("Error deleting todo: ", error);
             }
         }
@@ -251,7 +315,7 @@ function ToDoApp() {
                         onChange={(e) => setNewTodo (e.target.value)}
                     />
                     
-                    <input type='date' id='deadline1' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <input type='date' id='deadline1' value={editDeadline} onChange={e => setEditDeadline(e.target.value) }/>
 
                     <button className = "task-button" onClick={() => {
                         handleUpdate();
@@ -270,15 +334,26 @@ function ToDoApp() {
         setTodos([...todos, newTodo]);
     }
     
-    const toggleComplete = (todo) => {
+    const toggleComplete = async (todo) => {
 
         console.log("Toggling: ", todo);
-        const url = `http://127.0.0.1:8000/tasks?token=${user}`;
-        const response = axios.put( url, {
-            task: todo.task,
-            status: !todo.status,
-            deadline: todo.deadline,
-        });
+        const url = 'http://localhost:3001/updatetask'
+            const response = await axios.put(url, {
+                headers: {
+                    token: user,
+                },
+                params: {
+                    task: todo.task,
+                    status: !todo.status,
+                    deadline: todo.deadline,
+                }
+            });
+        // const url = `http://127.0.0.1:8000/tasks?token=${user}`;
+        // const response = axios.put( url, {
+        //     task: todo.task,
+        //     status: !todo.status,
+        //     deadline: todo.deadline,
+        // });
         setTodos(
         todos.map((t) =>
             t === todo ? { ...t, status: !t.status} : t
@@ -312,6 +387,9 @@ function ToDoApp() {
         }
     }
     
+    useEffect(() => {
+        fetchTasks();
+    }, []);
 
     return (
         <>
