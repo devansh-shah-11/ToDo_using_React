@@ -9,15 +9,25 @@ export const UserProvider = ({ children }) => {
     const facebooklogin = async (accessToken, email, name) => {
         try {
             console.log("Registering user...", name, email, accessToken);
-            const url = `http://localhost:8000/users/facebooklogin`;
+            const url = 'http://localhost:3001/facebooklogin';
             const response = await axios.post(
-                url,
-                {
-                    accessToken: accessToken,
-                    email: email,
-                    name: name,
+                url, {
+                    params: {
+                        accessToken: accessToken,
+                        email: email,
+                        name: name,
+                    }
                 }
             );
+            // const url = `http://localhost:8000/users/facebooklogin`;
+            // const response = await axios.post(
+            //     url,
+            //     {
+            //         accessToken: accessToken,
+            //         email: email,
+            //         name: name,
+            //     }
+            // );
             console.log("Response: ", response);
             const session_token = response.data.session_token;
             if (session_token !== null){
@@ -65,13 +75,23 @@ export const UserProvider = ({ children }) => {
     const emailPasswordSignup = async (name, email, password) => {
         console.log("Registering user...", name);
         try {
-            const url = 'http://localhost:8000/users/signup';
-            const response = axios.post(
-                url,
-                {
-                    name: name,
-                    email: email,
-                    password: password,
+            // const url = 'http://localhost:8000/users/signup';
+            // const response = axios.post(
+            //     url,
+            //     {
+            //         name: name,
+            //         email: email,
+            //         password: password,
+            //     }
+            // );
+            const url = 'http://localhost:3001/signup';
+            const response = await axios.post(
+                url, {
+                    params: {
+                        name: name,
+                        email: email,
+                        password: password,
+                    }
                 }
             );
             console.log("Response: ", response)

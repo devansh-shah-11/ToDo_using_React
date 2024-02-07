@@ -10,6 +10,7 @@ app.use(express.json())
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { access } = require('fs');
 
 const port = 8000;
 
@@ -30,7 +31,8 @@ const collection = db.collection('users');
 
 // handle signup
 app.post('/signup', async (req, res) => {
-    user = req.query;
+    user = req.body.params;
+    console.log(req.body);
     if (!user.name){
         return res.status(400).json({ message: 'Name is required' });
     }
@@ -97,6 +99,39 @@ app.post('/login', async (req, res) => {
     } 
     else {
         return res.status(400).json({ message: 'Invalid email or password' });
+    }
+});
+
+app.post('/facebooklogin', async (req, res) => {
+    console.log(req.body.params);
+    access_token = req.body.params.accessToken;
+    email = req.body.params.email;
+    nam = req.body.params.name;
+    console.log(access_token, email, nam);
+    const existingUser = await collection.findOne({ email: email });
+    console.log(existingUser);
+    if (access_token) {
+        const token = jwt.sign({ email: email, name: nam }, process.env.TOKEN_KEY, { expiresIn: '12h' });
+        // user.token = token;
+        console.log(token);
+        if (existingUser){
+            collection.updateOne({ email: email }, { $set: { session_token: token } }).then(result => {
+            console.log(result);
+            }).catch(err => {
+                console.error('Error setting token', err);
+            });
+        }
+        else{
+            collection.insertOne({ email: email, name: nam, session_token: token }).then(result => {
+                console.log(result);
+            }).catch(err => {
+                console.error('Error inserting user', err);
+            });
+        }
+        return res.json({ message: 'Login successful' , session_token: token});
+    } 
+    else {
+        return res.status(400).json({ message: 'Invalid Access Token' });
     }
 });
 
