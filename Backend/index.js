@@ -10,7 +10,6 @@ app.use(express.json())
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { access } = require('fs');
 
 const port = 8000;
 

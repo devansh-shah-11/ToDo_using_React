@@ -13,7 +13,20 @@ function ToDoApp() {
     const { logOutUser } = useContext(UserContext);
     const [filter, setFilter] = useState("All");
     const [todos, setTodos] = useState([]);
+
+
     const [deadline, setDeadline] = useState('');
+    const [editDeadline, setEditDeadline] = useState('');
+
+    useEffect(() => {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = today.getFullYear();
+        const todayDate = yyyy + '-' + mm + '-' + dd;
+        setDeadline(todayDate);
+    }
+    , []);
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -72,14 +85,15 @@ function ToDoApp() {
                     token: user,
                 }
             });
-            console.log("Response: ", response);
+            console.log("the tasks tadadada")
             let newTodos = [];
             for (let [task, status] of Object.entries(response.data)) {
                 console.log("Task: ", task);
+                console.log("Status: ", status);
                 const newTodo = {
                     task: task,
                     status: status[0],
-                    deadline: status[1]['$date'] ? status[1]['$date'].split("T")[0] : "-",
+                    deadline: status[1] ? status[1] : "-",
                     isUpdating: false,
                 };
                 newTodos.push(newTodo);
@@ -147,7 +161,15 @@ function ToDoApp() {
                     });
                     console.log("Added New Todo: ", newTodo);
                     setTodo('');
-                    setDeadline('');
+                    // setDeadline('');
+                    // set today's date as default deadline
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    const yyyy = today.getFullYear();
+                    const todayDate = yyyy + '-' + mm + '-' + dd;
+                    setDeadline(todayDate);
+                    
                 }
                 catch (error) {
                     if (error.response) {
@@ -187,8 +209,7 @@ function ToDoApp() {
         const updateRef = useRef(null);
 
         const handleUpdate = async () => {
-            
-            const Newdeadline = deadline ? new Date(deadline).toISOString().split("T")[0] : "-";
+            const Newdeadline = editDeadline ? new Date(editDeadline).toISOString().split("T")[0] : "-";
             console.log("New Deadline: ", Newdeadline);
             const originalTodo = updateRef.current;
             console.log("Original: ", originalTodo);
@@ -210,7 +231,7 @@ function ToDoApp() {
                     task: todo.task,
                     utask: newTodo,
                     status: !todo.status,
-                    deadline: todo.deadline,
+                    deadline: Newdeadline,
                 }
             });
 
@@ -294,7 +315,7 @@ function ToDoApp() {
                         onChange={(e) => setNewTodo (e.target.value)}
                     />
                     
-                    <input type='date' id='deadline1' value={deadline} onChange={e => setDeadline(e.target.value) }/>
+                    <input type='date' id='deadline1' value={editDeadline} onChange={e => setEditDeadline(e.target.value) }/>
 
                     <button className = "task-button" onClick={() => {
                         handleUpdate();
