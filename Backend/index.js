@@ -161,6 +161,22 @@ app.post('/addtask', async (req, res) => {
     }
 });
 
+app.get('/tokenexpiry', async (req, res) => {
+    token = req.headers.token;
+    if (!token) {
+        return res.status(400).json({ message: 'User is not logged in' });
+    }
+
+    const existingUser = await collection.findOne({ session_token: token });
+    console.log(existingUser);
+    if (existingUser) {
+        return res.json({ message: 'Token is valid' , expiration_time: existingUser.expiration_time});
+    }
+    else {
+        return res.status(400).json({ message: 'Token has expired' });
+    }
+});
+
 app.get('/gettasks', async (req, res) => {
     token = req.headers.token;
     if (!token) {

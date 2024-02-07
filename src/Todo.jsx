@@ -25,9 +25,15 @@ function ToDoApp() {
     }, []);
     
     async function checkTokenExpiration() {
-        const url = `http://localhost:8000/token/`;
+        // const url = `http://localhost:8000/token/`;
+        // const response = await axios.get(url, {
+        //     params: {
+        //         session_token: user,
+        //     }
+        // });
+        const url = 'http://localhost:3001/tokenexpiry'
         const response = await axios.get(url, {
-            params: {
+            headers: {
                 session_token: user,
             }
         });
