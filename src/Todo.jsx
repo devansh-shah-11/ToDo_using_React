@@ -203,7 +203,7 @@ function ToDoApp() {
                 params: {
                     task: todo.task,
                     utask: newTodo,
-                    status: newTodo.status,
+                    status: !todo.status,
                     deadline: todo.deadline,
                 }
             });
@@ -307,15 +307,26 @@ function ToDoApp() {
         setTodos([...todos, newTodo]);
     }
     
-    const toggleComplete = (todo) => {
+    const toggleComplete = async (todo) => {
 
         console.log("Toggling: ", todo);
-        const url = `http://127.0.0.1:8000/tasks?token=${user}`;
-        const response = axios.put( url, {
-            task: todo.task,
-            status: !todo.status,
-            deadline: todo.deadline,
-        });
+        const url = 'http://localhost:3001/updatetask'
+            const response = await axios.put(url, {
+                headers: {
+                    token: user,
+                },
+                params: {
+                    task: todo.task,
+                    status: !todo.status,
+                    deadline: todo.deadline,
+                }
+            });
+        // const url = `http://127.0.0.1:8000/tasks?token=${user}`;
+        // const response = axios.put( url, {
+        //     task: todo.task,
+        //     status: !todo.status,
+        //     deadline: todo.deadline,
+        // });
         setTodos(
         todos.map((t) =>
             t === todo ? { ...t, status: !t.status} : t

@@ -36,14 +36,16 @@ export const UserProvider = ({ children }) => {
 
     const emailPasswordLogin = async (email, password) => {
         try{
-            const url = 'http://localhost:8000/users/login';
+            const url = 'http://localhost:3001/login';
             const response = await axios.post(
-                url,
-                {
-                    email: email,
-                    password: password,
+                url, {
+                    params: {
+                        email: email,
+                        password: password,
+                    }
                 }
             );
+            console.log("Response: ", response.data);
             const session_token = response.data.session_token;
             
             if (session_token !== null){

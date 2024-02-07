@@ -71,7 +71,8 @@ app.post('/signup', async (req, res) => {
 
 // handle login
 app.post('/login', async (req, res) => {
-    user = req.query;
+    console.log(req.body.params);
+    user = req.body.params;
     console.log(user);
     if (!user.email) {
         return res.status(400).json({ message: 'Email is required' });
@@ -84,15 +85,15 @@ app.post('/login', async (req, res) => {
     console.log(existingUser);
     if (existingUser && await (bcrypt.compare(user.password, existingUser.password))) {
         const token = jwt.sign({ email: user.email, name: existingUser.name }, process.env.TOKEN_KEY, { expiresIn: '12h' });
-        user.token = token;
-
+        // user.token = token;
+        console.log(token);
         collection.updateOne({ email: user.email }, { $set: { session_token: token } }).then(result => {
             console.log(result);
         }).catch(err => {
             console.error('Error setting token', err);
         });
         
-        return res.json({ message: 'Login successful' });
+        return res.json({ message: 'Login successful' , session_token: token});
     } 
     else {
         return res.status(400).json({ message: 'Invalid email or password' });
@@ -174,7 +175,6 @@ app.get('/gettasks', async (req, res) => {
 });
 
 app.delete('/deletetask', async (req, res) => {
-    console.log("hiiiiiiiiiiiiiiiiiiiiiiiii\n\n\n\n\n");
     token = req.headers.token;
     dtask = req.query.task;
     if (!token) {
@@ -210,6 +210,7 @@ app.put('/updatetask', async (req, res) => {
     ustatus = req.body.params.status;
     deadline = req.body.params.deadline;
     utask = req.body.params.utask || currtask;
+    console.log(req.body.params);
     if (!token) {
         return res.status(400).json({ message: 'User is not logged in' });
     }
