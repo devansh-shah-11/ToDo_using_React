@@ -32,7 +32,6 @@ const collection = db.collection('users');
 // handle signup
 app.post('/signup', async (req, res) => {
     user = req.body.params;
-    console.log(req.body);
     if (!user.name){
         return res.status(400).json({ message: 'Name is required' });
     }
@@ -73,9 +72,7 @@ app.post('/signup', async (req, res) => {
 
 // handle login
 app.post('/login', async (req, res) => {
-    console.log(req.body.params);
     user = req.body.params;
-    console.log(user);
     if (!user.email) {
         return res.status(400).json({ message: 'Email is required' });
     }
@@ -103,11 +100,9 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/facebooklogin', async (req, res) => {
-    console.log(req.body.params);
     access_token = req.body.params.accessToken;
     email = req.body.params.email;
     nam = req.body.params.name;
-    console.log(access_token, email, nam);
     const existingUser = await collection.findOne({ email: email });
     console.log(existingUser);
     if (access_token) {
@@ -136,7 +131,7 @@ app.post('/facebooklogin', async (req, res) => {
 });
 
 app.post('/logout', async (req, res) => {
-    token = req.headers.token;
+    token = req.body.headers.session_token;
     if (!token) {
         return res.status(400).json({ message: 'User is not logged in' });
     }
@@ -157,7 +152,6 @@ app.post('/logout', async (req, res) => {
 
 app.post('/addtask', async (req, res) => {
     token = req.body.headers.token;
-    console.log(req);
     if (!token) {
         return res.status(400).json({ message: 'User is not logged in' });
     }
