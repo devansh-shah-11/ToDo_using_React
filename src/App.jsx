@@ -4,6 +4,7 @@ import ToDoApp from "./Todo.jsx";
 import Login from "./pages/Login.page.jsx";
 import PrivateRoute from "./pages/PrivateRoute.page.jsx";
 import Signup from "./pages/Signup.page.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
 
 function App() {
     return (
@@ -17,8 +18,9 @@ function App() {
             {/* We are protecting our Home Page from unauthenticated */}
             {/* users by wrapping it with PrivateRoute here. */}
             <Route element={<PrivateRoute />}>
-            <Route exact path="/" element={<ToDoApp />} />
+                <Route exact path="/" element={<ToDoApp />} />
             </Route>
+            <Route path="/forgotpassword" Component={ForgotPassword} />
         </Routes>
         </UserProvider>
     </BrowserRouter>

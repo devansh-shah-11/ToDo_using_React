@@ -72,7 +72,7 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const emailPasswordSignup = async (name, email, password) => {
+    const emailPasswordSignup = async (name, email, password, secretQuestion, secretAnswer) => {
         console.log("Registering user...", name);
         try {
             // const url = 'http://localhost:8000/users/signup';
@@ -91,6 +91,8 @@ export const UserProvider = ({ children }) => {
                         name: name,
                         email: email,
                         password: password,
+                        secretQuestion: secretQuestion,
+                        secretAnswer: secretAnswer,
                     }
                 }
             );
@@ -125,16 +127,58 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const forgotPassword = async (email, secretQuestion, secretAnswer) => {
+        try {
+            const url = 'http://localhost:3001/forgotpassword';
+            const response = await axios.post(
+                url, {
+                    params: {
+                        email: email,
+                        secretQuestion: secretQuestion,
+                        secretAnswer: secretAnswer,
+                    }
+                }
+            );
+            console.log("Response: ", response);
+            return response;
+        } catch (error) {
+            console.log("Error resetting password: ", error);
+            throw error;
+        }
+    }
+
+    const resetPassword = async (email, newPassword) => {
+        try {
+            const url = 'http://localhost:3001/resetpassword';
+            const response = await axios.post(
+                url, {
+                    params: {
+                        email: email,
+                        newPassword: newPassword,
+                    }
+                }
+            );
+            console.log("Response: ", response);
+            return response;
+        } catch (error) {
+            console.log("Error resetting password: ", error);
+            throw error;
+        }
+    }
+
+
     return (
         <UserContext.Provider
-        value={{
-            user,
-            setUser,
-            emailPasswordLogin,
-            facebooklogin,
-            emailPasswordSignup,
-            logOutUser,
-        }}
+            value={{
+                user,
+                setUser,
+                emailPasswordLogin,
+                facebooklogin,
+                emailPasswordSignup,
+                logOutUser,
+                forgotPassword,
+                resetPassword,
+            }}
         >
         {children}
         </UserContext.Provider>
