@@ -17,7 +17,7 @@ function ForgotPassword() {
     const location = useLocation();
 
     const { forgotPassword, resetPassword } = useContext(UserContext);
-
+    
     const [UpdatePassword, setUpdatePassword] = useState(false);
 
     const [form, setForm] = useState({
