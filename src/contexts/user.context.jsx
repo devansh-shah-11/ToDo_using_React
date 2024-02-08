@@ -127,21 +127,38 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    const ResetPassword = async (email, secretQuestion, secretAnswer, newPassword) => {
+    const forgotPassword = async (email, secretQuestion, secretAnswer) => {
         try {
-            const url = 'http://localhost:3001/resetpassword';
+            const url = 'http://localhost:3001/forgotpassword';
             const response = await axios.post(
                 url, {
                     params: {
                         email: email,
                         secretQuestion: secretQuestion,
                         secretAnswer: secretAnswer,
+                    }
+                }
+            );
+            console.log("Response: ", response);
+            return response;
+        } catch (error) {
+            console.log("Error resetting password: ", error);
+            throw error;
+        }
+    }
+
+    const resetPassword = async (email, newPassword) => {
+        try {
+            const url = 'http://localhost:3001/resetpassword';
+            const response = await axios.post(
+                url, {
+                    params: {
+                        email: email,
                         newPassword: newPassword,
                     }
                 }
             );
             console.log("Response: ", response);
-            console.log("Successfully reset password!");
             return response;
         } catch (error) {
             console.log("Error resetting password: ", error);
@@ -152,15 +169,16 @@ export const UserProvider = ({ children }) => {
 
     return (
         <UserContext.Provider
-        value={{
-            user,
-            setUser,
-            emailPasswordLogin,
-            facebooklogin,
-            emailPasswordSignup,
-            logOutUser,
-            ResetPassword,
-        }}
+            value={{
+                user,
+                setUser,
+                emailPasswordLogin,
+                facebooklogin,
+                emailPasswordSignup,
+                logOutUser,
+                forgotPassword,
+                resetPassword,
+            }}
         >
         {children}
         </UserContext.Provider>

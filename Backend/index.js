@@ -161,7 +161,38 @@ app.post('/forgotpassword', async (req, res) => {
         return res.json({ message: 'Secret Question and Answer are valid' });
     } 
     else {
-        return res.status(400).json({ message: 'Invalid Secret Question or Answer' });
+        return res.status(400).json({ message: 'Sorry, the input fields dont match' });
+    }
+});
+
+app.post('/resetpassword', async (req, res) => {
+    user = req.body.params;
+    console.log("Parameters: ", user)
+    if (!user.email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+    if (!user.newPassword) {
+        return res.status(400).json({ message: 'New Password is required' });
+    }
+
+    // if (user.password.length < 8 || user.password.specialCharacter<1 || user.password.digit<1 || user.password.uppercase<1 || user.password.lowercase<1) {
+    //     return res.status(400).json({ message: 'Password must be at least 8 characters long and contain at least one special character, one digit, one uppercase letter, and one lowercase letter' });    
+    // }
+
+    const existingUser = await collection.findOne({ email: user.email });
+    console.log(existingUser);
+    
+    if (existingUser) {
+        encryptedUserPassword = await bcrypt.hash(user.newPassword, 10);
+        user.newPassword = encryptedUserPassword;
+        collection.updateOne({ email: user.email }, { $set: { password: user.newPassword } }).then(result => {
+            console.log("Updated Password: ", result);
+            return res.json({ message: 'Password reset successful' });
+        }).catch(err => {
+            console.error('Error resetting password', err);
+        });
+    }else{
+        return res.status(400).json({ message: 'User does not exist' });
     }
 });
 

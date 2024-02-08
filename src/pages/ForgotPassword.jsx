@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button, TextField, Select, MenuItem } from "@mui/material";
 import { UserContext } from "../contexts/user.context.jsx";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const secretQuestions = [
     "What is your mother's maiden name?",
@@ -11,7 +12,12 @@ const secretQuestions = [
 ]
 
 function ForgotPassword() {
-    
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const { forgotPassword, resetPassword } = useContext(UserContext);
+
     const [UpdatePassword, setUpdatePassword] = useState(false);
 
     const [form, setForm] = useState({
@@ -30,16 +36,26 @@ function ForgotPassword() {
         const redirectTo = location.search.replace("?redirectTo=", "");
         navigate(redirectTo ? redirectTo : "/");
     }
-    
-    const onSubmit = async () => {
+
+    const onSubmit = async (event) => {
     try {
+        event.preventDefault();
         console.log("Form: ", form)
-        const response = await ResetPassword(form.email, form.secretQuestion, form.secretAnswer);
+        const response = await forgotPassword(form.email, form.secretQuestion, form.secretAnswer);
         if (response.status === 200){
-            redirectNow('/login');
+            setUpdatePassword(true);
+            const res = await resetPassword(form.email, form.password);
+            if (res.status === 200){
+                console.log("Password Reset Successfully");
+                redirectNow('/login');
+                setUpdatePassword(false);
+            }
+            else{
+                alert("Error Resetting new password. Try again!");
+            }
         }
         else{
-            alert("Error signing up. Try again!");
+            alert("Error Resetting new password. Try again!");
         }
     } catch (error) {
         alert(error);
@@ -60,7 +76,7 @@ function ForgotPassword() {
                     onInput={onFormInputChange}
                     style={{ marginBottom: "1rem" }}
                 />
-                <Select
+                {!UpdatePassword && <Select
                     label="Secret Question"
                     variant="outlined"
                     name="secretQuestion"
@@ -70,8 +86,8 @@ function ForgotPassword() {
                     >{secretQuestions.map((question, index) => (
                         <MenuItem key={index} value={question}>{question}</MenuItem>
                     ))}
-                </Select>
-                <TextField
+                </Select>}
+                {!UpdatePassword && <TextField
                     label="Secret Answer"
                     type="text"
                     variant="outlined"
@@ -79,7 +95,16 @@ function ForgotPassword() {
                     value={form.secretAnswer}
                     onInput={onFormInputChange}
                     style={{ marginBottom: "1rem" }}
-                />
+                />}
+                {UpdatePassword && <TextField
+                    label="New Password"
+                    type="password"
+                    variant="outlined"
+                    name="password"
+                    value={form.password}
+                    onInput={onFormInputChange}
+                    style={{ marginBottom: "1rem" }}
+                />}
                 <Button variant="contained" color="primary" onClick={onSubmit}>
                     Submit details
                 </Button>
