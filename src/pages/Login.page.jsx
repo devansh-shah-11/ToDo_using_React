@@ -102,6 +102,10 @@ const Login = () => {
                     Login
                 </Button>
                 <br></br>
+                <div style={{ textAlign: "center" }}>
+                    <Link to="/forgotpassword">Forgot Password?</Link>
+                </div>
+                <br></br>
                 <div className="fb-login-btn">
                     <FacebookLogin
                         appId="813331880600210"

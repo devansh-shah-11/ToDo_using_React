@@ -31,6 +31,7 @@ const collection = db.collection('users');
 // handle signup
 app.post('/signup', async (req, res) => {
     user = req.body.params;
+    console.log(user);
     if (!user.name){
         return res.status(400).json({ message: 'Name is required' });
     }
@@ -56,6 +57,19 @@ app.post('/signup', async (req, res) => {
     // if (user.password.length < 8 || user.password.specialCharacter<1 || user.password.digit<1 || user.password.uppercase<1 || user.password.lowercase<1) {
     //     return res.status(400).json({ message: 'Password must be at least 8 characters long and contain at least one special character, one digit, one uppercase letter, and one lowercase letter' });    
     // }
+
+    if(!user.secretQuestion){
+        return res.status(400).json({ message: 'Secret Question is required' });
+    }
+
+    if(!user.secretAnswer){
+        return res.status(400).json({ message: 'Secret Answer is required' });
+    }
+
+    encryptedSecretQuestion = await bcrypt.hash(user.secretQuestion, 10);
+    user.secretQuestion = encryptedSecretQuestion;
+    encryptedSecretAnswer = await bcrypt.hash(user.secretAnswer, 10);
+    user.secretAnswer = encryptedSecretAnswer;
 
     encryptedUserPassword = await bcrypt.hash(user.password, 10);
     user.password = encryptedUserPassword;
@@ -126,6 +140,28 @@ app.post('/facebooklogin', async (req, res) => {
     } 
     else {
         return res.status(400).json({ message: 'Invalid Access Token' });
+    }
+});
+
+app.post('/forgotpassword', async (req, res) => {
+    user = req.body.params;
+    if (!user.email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+    if (!user.secretQuestion) {
+        return res.status(400).json({ message: 'Secret Question is required' });
+    }
+    if (!user.secretAnswer) {
+        return res.status(400).json({ message: 'Secret Answer is required' });
+    }
+
+    const existingUser = await collection.findOne({ email: user.email });
+    console.log(existingUser);
+    if (existingUser && await (bcrypt.compare(user.secretQuestion, existingUser.secretQuestion)) && await (bcrypt.compare(user.secretAnswer, existingUser.secretAnswer))) {
+        return res.json({ message: 'Secret Question and Answer are valid' });
+    } 
+    else {
+        return res.status(400).json({ message: 'Invalid Secret Question or Answer' });
     }
 });
 
